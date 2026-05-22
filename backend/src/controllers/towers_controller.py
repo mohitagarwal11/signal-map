@@ -76,4 +76,4 @@ def get_tower_count(min_lat, max_lat, min_lon, max_lon):
         )
         count = result.scalar()
 
-    return count
+    return {"count": count}
