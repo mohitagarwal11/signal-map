@@ -1,12 +1,7 @@
-import Map from "./components/Map.jsx";
+import Dashboard from "./pages/Dashboard/Dashboard.jsx";
 
 function App() {
-  return (
-    <>
-      <h1>SignalM</h1>
-      <Map />
-    </>
-  );
+  return <Dashboard />;
 }
 
 export default App;

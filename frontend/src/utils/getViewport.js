@@ -16,8 +16,8 @@ export function getViewport(map) {
 
   return {
     min_lat,
-    min_lon,
     max_lat,
+    min_lon,
     max_lon,
   };
 }

@@ -37,7 +37,7 @@ def get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset):
                 "max_lat": max_lat,
                 "min_lon": min_lon,
                 "max_lon": max_lon,
-                "limit": min(limit, 2000),
+                "limit": min(limit, 5000),
                 "offset": offset,
             },
         )
