@@ -2,10 +2,10 @@ export function getViewport(map) {
   const bounds = map.getBounds();
 
   const min_lat = bounds._sw.lat;
-  const min_lng = bounds._sw.lon;
+  const min_lon = bounds._sw.lng;
 
   const max_lat = bounds._ne.lat;
-  const max_lng = bounds._ne.lon;
+  const max_lon = bounds._ne.lng;
 
   // console.log("Viewport bounds:", {
   //   min_lat,
@@ -16,8 +16,8 @@ export function getViewport(map) {
 
   return {
     min_lat,
-    min_lng,
+    min_lon,
     max_lat,
-    max_lng,
+    max_lon,
   };
 }

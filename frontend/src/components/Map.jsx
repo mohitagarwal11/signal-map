@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { getViewport } from "../utils/getViewport";
 import { getTowerCount } from "../api/towers.api";
 

@@ -43,6 +43,7 @@ def get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset):
         )
         towers = [dict(row._mapping) for row in result]
 
+    print(f"Fetched {len(towers)} towers")
     return {
         "limit": limit,
         "offset": offset,
@@ -76,4 +77,5 @@ def get_tower_count(min_lat, max_lat, min_lon, max_lon):
         )
         count = result.scalar()
 
+    print(f"Fetched total towers in bounds: {count}")
     return {"count": count}
