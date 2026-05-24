@@ -1,5 +1,4 @@
 import { HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID } from "../constants/layerIds";
-
 import { HEATMAP_LAYER } from "./heatmapLayer";
 
 export function getHeatmapLayerConfig(map) {

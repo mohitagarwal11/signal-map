@@ -3,6 +3,7 @@ import { createViewportKey } from "./viewportKey";
 import { createViewportCache } from "./viewportCache";
 import { expandViewport } from "../../utils/expandViewport";
 import { quantizeViewport } from "../../utils/quantizeViewport";
+
 import { devLog } from "../../utils/devLog";
 
 const DEFAULT_DEBOUNCE_MS = 300;
@@ -77,19 +78,12 @@ export function createViewportController(config) {
   function createFetchBounds(bounds, mode) {
     const bufferedBounds = expandViewport(
       bounds,
-      VIEWPORT_EXPANSION_FACTOR[mode]
+      VIEWPORT_EXPANSION_FACTOR[mode],
     );
     const quantizedBounds = quantizeViewport(
       bufferedBounds,
-      VIEWPORT_QUANTIZATION_STEP[mode]
+      VIEWPORT_QUANTIZATION_STEP[mode],
     );
-
-    // Fetching ahead of the visible map reduces edge pop-in, while snapping
-    // fetch bounds to stable buckets improves cache reuse during small pans.
-    // devLog("ORIGINAL VIEWPORT", bounds);
-    // devLog("BUFFERED VIEWPORT", bufferedBounds);
-    // devLog("QUANTIZED VIEWPORT", quantizedBounds);
-
     return quantizedBounds;
   }
 
@@ -190,11 +184,9 @@ export function createViewportController(config) {
     debounceTimer = window.setTimeout(() => {
       const descriptor = getFetchDescriptor({ bounds, zoom });
 
-      executeRequest({ ...descriptor, zoom }).catch(
-        (error) => {
-          devLog("Error fetching viewport data:", error);
-        }
-      );
+      executeRequest({ ...descriptor, zoom }).catch((error) => {
+        devLog("Error fetching viewport data:", error);
+      });
     }, debounceMs);
   }
 

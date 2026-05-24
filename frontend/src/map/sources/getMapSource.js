@@ -1,7 +1,6 @@
 export function getMapSource(map, sourceId) {
-  if (!map || typeof map.getSource !== "function") {
+  if (!map) {
     return null;
   }
-
   return map.getSource(sourceId);
 }

@@ -1,7 +1,6 @@
 export function getMapLayer(map, layerId) {
-  if (!map || typeof map.getLayer !== "function") {
+  if (!map) {
     return null;
   }
-
   return map.getLayer(layerId);
 }

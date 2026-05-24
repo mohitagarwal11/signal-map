@@ -7,10 +7,9 @@ import { getMapLayer } from "../sources/getMapLayer";
 import { getMapSource } from "../sources/getMapSource";
 import { logHeatmapLayerStatus } from "../debug/logHeatmapLayerStatus";
 import { getZoomValue } from "../utils/getZoomValue";
-import { isMapStyleReady } from "../utils/isMapStyleReady";
 
 export function renderMap({ map, renderState }) {
-  if (!map || !renderState.mapReady || !isMapStyleReady(map)) {
+  if (!map || !renderState.mapReady) {
     return;
   }
 
@@ -21,13 +20,9 @@ export function renderMap({ map, renderState }) {
 
   devLog("RAW_LAYER_STATUS", {
     mode: renderState.mode,
-
     zoom: getZoomValue(map),
-
     rawFeatureCount: renderState.rawGeoJSON.features.length,
-
     rawSourcePresent: Boolean(getMapSource(map, RAW_TOWER_SOURCE_ID)),
-
     rawLayerPresent: Boolean(getMapLayer(map, RAW_TOWER_LAYER_ID)),
   });
 

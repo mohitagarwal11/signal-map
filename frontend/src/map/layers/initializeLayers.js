@@ -1,14 +1,12 @@
-import { devLog } from "../../utils/devLog";
 import { ensureGeoJSONLayer } from "./ensureGeoJSONLayer";
 import { ensureHeatmapLayer } from "./ensureHeatmapLayer";
 import { getClusterLayerConfig } from "./getClusterLayerConfig";
 import { getHeatmapLayerConfig } from "./getHeatmapLayerConfig";
 import { getRawTowerLayerConfig } from "./getRawTowerLayerConfig";
-import { isMapStyleReady } from "../utils/isMapStyleReady";
 import { getZoomValue } from "../utils/getZoomValue";
 
 export function initializeLayers({ map, renderState }) {
-  if (!map || !isMapStyleReady(map)) {
+  if (!map) {
     return false;
   }
 
@@ -35,10 +33,6 @@ export function initializeLayers({ map, renderState }) {
 
     if (heatmapReady === false) {
       renderState.heatmapAvailable = false;
-
-      devLog("Heatmap disabled; using cluster circles only.", {
-        zoom: getZoomValue(map),
-      });
     }
   }
 

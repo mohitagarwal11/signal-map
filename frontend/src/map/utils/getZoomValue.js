@@ -1,5 +1,5 @@
 export function getZoomValue(map) {
-  if (!map || typeof map.getZoom !== "function") {
+  if (!map) {
     return null;
   }
 

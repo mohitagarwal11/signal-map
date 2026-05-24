@@ -1,5 +1,4 @@
 import { RAW_TOWER_SOURCE_ID, RAW_TOWER_LAYER_ID } from "../constants/layerIds";
-
 import { RAW_TOWER_LAYER } from "./rawTowerLayer";
 
 export function getRawTowerLayerConfig(map) {

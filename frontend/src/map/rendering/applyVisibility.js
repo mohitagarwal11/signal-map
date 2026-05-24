@@ -33,13 +33,10 @@ export function applyVisibility({ map, renderState }) {
 
   devLog("VISIBILITY_STATE", {
     mode: renderState.mode,
-
     zoom,
-
     clusterVisible,
     heatmapVisible,
     rawVisible,
-
     rawLayerPresent: Boolean(getMapLayer(map, RAW_TOWER_LAYER_ID)),
   });
 }
