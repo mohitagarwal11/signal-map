@@ -16,7 +16,7 @@ INITIAL_VIEWPORT_BOUNDS = {
     "min_lon": 67,
     "max_lon": 103,
 }
-INITIAL_VIEWPORT_ZOOM = 3.75
+INITIAL_VIEWPORT_ZOOM = 4
 OUTPUT_PATH = SRC_DIR / "static" / "initial_clusters.json"
 
 

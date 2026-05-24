@@ -1,0 +1,277 @@
+export const INITIAL_CLUSTER_SNAPSHOT = {
+  generated_at: "2026-05-24T12:26:20.252688+00:00",
+  zoom: 4,
+  bounds: { min_lat: 6, max_lat: 40, min_lon: 67, max_lon: 103 },
+  clusters: [
+    {
+      latitude: 12.423261639409464,
+      longitude: 77.68519626115133,
+      tower_count: 313992,
+    },
+    {
+      latitude: 29.136713612538276,
+      longitude: 77.29431311811521,
+      tower_count: 288540,
+    },
+    {
+      latitude: 19.083641057860934,
+      longitude: 72.9342706826246,
+      tower_count: 182592,
+    },
+    {
+      latitude: 17.56441238493826,
+      longitude: 78.38386121523178,
+      tower_count: 146125,
+    },
+    {
+      latitude: 12.85897082386755,
+      longitude: 80.10318895106262,
+      tower_count: 127500,
+    },
+    {
+      latitude: 18.303461772191742,
+      longitude: 74.14610204243161,
+      tower_count: 119647,
+    },
+    {
+      latitude: 23.08918576331511,
+      longitude: 87.85931194791624,
+      tower_count: 115796,
+    },
+    {
+      latitude: 27.84287543215666,
+      longitude: 77.58278115214158,
+      tower_count: 104139,
+    },
+    {
+      latitude: 9.323494129601686,
+      longitude: 77.26600107276693,
+      tower_count: 86652,
+    },
+    {
+      latitude: 21.464057892366792,
+      longitude: 72.66022627552645,
+      tower_count: 76311,
+    },
+    {
+      latitude: 11.776648624488203,
+      longitude: 75.73716785989402,
+      tower_count: 70107,
+    },
+    {
+      latitude: 23.20715803030214,
+      longitude: 72.51906128990221,
+      tower_count: 66970,
+    },
+    {
+      latitude: 30.50925881354456,
+      longitude: 75.63850685250777,
+      tower_count: 56061,
+    },
+    {
+      latitude: 26.74781252553115,
+      longitude: 80.83290216100123,
+      tower_count: 53383,
+    },
+    {
+      latitude: 26.998861301737577,
+      longitude: 75.5549730031108,
+      tower_count: 51684,
+    },
+    {
+      latitude: 15.1846366539911,
+      longitude: 74.82647110204677,
+      tower_count: 49426,
+    },
+    {
+      latitude: 21.368441312275216,
+      longitude: 86.92254377741722,
+      tower_count: 48282,
+    },
+    {
+      latitude: 17.13618955007623,
+      longitude: 80.79464935023451,
+      tower_count: 42898,
+    },
+    {
+      latitude: 20.388720739966367,
+      longitude: 74.72283314679854,
+      tower_count: 41733,
+    },
+    {
+      latitude: 23.62539012329968,
+      longitude: 75.24758230035434,
+      tower_count: 40372,
+    },
+    {
+      latitude: 9.99022085410528,
+      longitude: 76.32613046590683,
+      tower_count: 39876,
+    },
+    {
+      latitude: 14.819201957879129,
+      longitude: 78.03793247206552,
+      tower_count: 37367,
+    },
+    {
+      latitude: 26.03674552228318,
+      longitude: 84.32630022390613,
+      tower_count: 31949,
+    },
+    {
+      latitude: 20.940364220932807,
+      longitude: 78.53168066481825,
+      tower_count: 30111,
+    },
+    {
+      latitude: 15.543316861634214,
+      longitude: 80.26567453194535,
+      tower_count: 29257,
+    },
+    {
+      latitude: 23.657233196642046,
+      longitude: 77.75760191402323,
+      tower_count: 28577,
+    },
+    {
+      latitude: 32.44398351521042,
+      longitude: 75.2823986809195,
+      tower_count: 27226,
+    },
+    {
+      latitude: 24.583174225507594,
+      longitude: 84.0632994680989,
+      tower_count: 26728,
+    },
+    {
+      latitude: 18.110618340763345,
+      longitude: 83.47180991870036,
+      tower_count: 22760,
+    },
+    {
+      latitude: 21.31235840793221,
+      longitude: 81.35091204676749,
+      tower_count: 18491,
+    },
+    {
+      latitude: 24.434244297235075,
+      longitude: 81.06516522761936,
+      tower_count: 17424,
+    },
+    {
+      latitude: 21.23275901747662,
+      longitude: 84.06794887671728,
+      tower_count: 16603,
+    },
+    {
+      latitude: 26.18695134924771,
+      longitude: 92.26955912459309,
+      tower_count: 14657,
+    },
+    {
+      latitude: 26.328867117772887,
+      longitude: 87.56913616956425,
+      tower_count: 13843,
+    },
+    {
+      latitude: 26.60039107896145,
+      longitude: 72.77331682322279,
+      tower_count: 13032,
+    },
+    {
+      latitude: 23.335945034154093,
+      longitude: 88.95422638235544,
+      tower_count: 7441,
+    },
+    {
+      latitude: 26.58491174550284,
+      longitude: 89.52549082611287,
+      tower_count: 6786,
+    },
+    {
+      latitude: 21.924192923320977,
+      longitude: 69.98656947829225,
+      tower_count: 6553,
+    },
+    {
+      latitude: 32.04950097729324,
+      longitude: 77.03298505746687,
+      tower_count: 5435,
+    },
+    {
+      latitude: 24.57982728356197,
+      longitude: 93.09660992680698,
+      tower_count: 4882,
+    },
+    {
+      latitude: 29.22831248152995,
+      longitude: 79.71415806155483,
+      tower_count: 4881,
+    },
+    {
+      latitude: 23.112327463486636,
+      longitude: 69.82539898673485,
+      tower_count: 4170,
+    },
+    {
+      latitude: 27.404709005239148,
+      longitude: 95.10199039167009,
+      tower_count: 2735,
+    },
+    {
+      latitude: 22.271349962547028,
+      longitude: 88.70689367646486,
+      tower_count: 540,
+    },
+    {
+      latitude: 11.704029488695543,
+      longitude: 92.75307699142202,
+      tower_count: 495,
+    },
+    {
+      latitude: 16.152674117513016,
+      longitude: 73.45944798701788,
+      tower_count: 252,
+    },
+    {
+      latitude: 29.13530193130304,
+      longitude: 73.16082335239037,
+      tower_count: 243,
+    },
+    {
+      latitude: 34.53717871202424,
+      longitude: 74.27646648763509,
+      tower_count: 133,
+    },
+    {
+      latitude: 10.428994295627254,
+      longitude: 79.74304795068356,
+      tower_count: 108,
+    },
+    {
+      latitude: 34.61547051107512,
+      longitude: 77.42875301435994,
+      tower_count: 44,
+    },
+    {
+      latitude: 27.49164874737073,
+      longitude: 70.43562082143927,
+      tower_count: 26,
+    },
+    {
+      latitude: 10.565349687255877,
+      longitude: 72.63737688195793,
+      tower_count: 16,
+    },
+    {
+      latitude: 8.2850059288737,
+      longitude: 73.05852949886066,
+      tower_count: 6,
+    },
+    {
+      latitude: 7.00481426708985,
+      longitude: 93.932762057129,
+      tower_count: 2,
+    },
+  ],
+};
