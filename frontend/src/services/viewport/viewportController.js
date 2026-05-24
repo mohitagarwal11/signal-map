@@ -1,5 +1,6 @@
 import { getFetchMode } from "./fetchMode";
 import { createViewportKey } from "./viewportKey";
+import { createViewportCache } from "./viewportCache";
 
 const DEFAULT_DEBOUNCE_MS = 300;
 
@@ -22,8 +23,10 @@ export function createViewportController(config) {
 
   let debounceTimer = null;
   let activeRequest = null;
-  let lastViewportKey = null;
+  let lastCacheKey = null;
   let requestId = 0;
+  const viewportCache = createViewportCache();
+  const inFlightRequests = new Map();
 
   const fetchByMode = {
     count: fetchTowerCount,
@@ -45,11 +48,53 @@ export function createViewportController(config) {
     }
   }
 
-  async function executeRequest({ bounds, zoom }) {
-    const mode = getFetchMode(zoom);
+  function createCacheKey(mode, viewportKey) {
+    return `${mode}:${viewportKey}`;
+  }
+
+  async function executeRequest({ bounds, zoom, mode, cacheKey }) {
     const fetchViewportData = fetchByMode[mode];
 
     if (!fetchViewportData) {
+      return;
+    }
+
+    if (viewportCache.has(cacheKey)) {
+      console.log("CACHE HIT", cacheKey);
+      requestId += 1;
+      cancelActiveRequest();
+      onData({
+        mode,
+        data: viewportCache.get(cacheKey),
+      });
+      return;
+    }
+
+    console.log("CACHE MISS", cacheKey);
+
+    if (inFlightRequests.has(cacheKey)) {
+      console.log("REQUEST REUSED", cacheKey);
+
+      const currentRequestId = requestId + 1;
+      requestId = currentRequestId;
+
+      try {
+        const data = await inFlightRequests.get(cacheKey);
+
+        if (currentRequestId !== requestId) {
+          return;
+        }
+
+        onData({
+          mode,
+          data,
+        });
+      } catch (error) {
+        if (!isAbortError(error)) {
+          throw error;
+        }
+      }
+
       return;
     }
 
@@ -61,12 +106,23 @@ export function createViewportController(config) {
     activeRequest = controller;
     requestId = currentRequestId;
 
-    try {
-      const data = await fetchViewportData({
-        bounds,
-        zoom,
-        signal: controller.signal,
+    const requestPromise = fetchViewportData({
+      bounds,
+      zoom,
+      signal: controller.signal,
+    })
+      .then((data) => {
+        viewportCache.set(cacheKey, data);
+        return data;
+      })
+      .finally(() => {
+        inFlightRequests.delete(cacheKey);
       });
+
+    inFlightRequests.set(cacheKey, requestPromise);
+
+    try {
+      const data = await requestPromise;
 
       if (controller.signal.aborted || currentRequestId !== requestId) {
         return;
@@ -92,13 +148,15 @@ export function createViewportController(config) {
 
     debounceTimer = window.setTimeout(() => {
       const viewportKey = createViewportKey(bounds);
+      const mode = getFetchMode(zoom);
+      const cacheKey = createCacheKey(mode, viewportKey);
 
-      if (viewportKey === lastViewportKey) {
+      if (cacheKey === lastCacheKey && viewportCache.has(cacheKey)) {
         return;
       }
 
-      lastViewportKey = viewportKey;
-      executeRequest({ bounds, zoom }).catch((error) => {
+      lastCacheKey = cacheKey;
+      executeRequest({ bounds, zoom, mode, cacheKey }).catch((error) => {
         console.log("Error fetching viewport data:", error);
       });
     }, debounceMs);
@@ -107,6 +165,8 @@ export function createViewportController(config) {
   function destroy() {
     clearDebounce();
     cancelActiveRequest();
+    inFlightRequests.clear();
+    viewportCache.clear();
   }
 
   return {
