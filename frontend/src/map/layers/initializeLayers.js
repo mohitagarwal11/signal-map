@@ -3,7 +3,6 @@ import { ensureHeatmapLayer } from "./ensureHeatmapLayer";
 import { getClusterLayerConfig } from "./getClusterLayerConfig";
 import { getHeatmapLayerConfig } from "./getHeatmapLayerConfig";
 import { getRawTowerLayerConfig } from "./getRawTowerLayerConfig";
-import { getZoomValue } from "../utils/getZoomValue";
 
 export function initializeLayers({ map, renderState }) {
   if (!map) {
