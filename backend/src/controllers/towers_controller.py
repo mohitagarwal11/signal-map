@@ -1,6 +1,7 @@
 # this should actually contain all the functions for handling tower data
 import logging
 import math
+import time
 
 from db.db import engine
 from sqlalchemy import text
@@ -49,6 +50,9 @@ def get_grid_size(zoom):
             DEFAULT_CLUSTER_ZOOM,
         )
         zoom = DEFAULT_CLUSTER_ZOOM
+
+    if zoom < 5:
+        return 3.0
 
     if zoom < 7:
         return 1.0
@@ -215,6 +219,8 @@ def get_tower_clusters(min_lat, max_lat, min_lon, max_lon, zoom):
             LIMIT :cluster_limit
         """)
 
+        query_start = time.perf_counter()
+
         with engine.connect() as conn:
             result = conn.execute(
                 query,
@@ -228,10 +234,19 @@ def get_tower_clusters(min_lat, max_lat, min_lon, max_lon, zoom):
                 },
             )
             clusters = [dict(row._mapping) for row in result]
+        query_duration_ms = (time.perf_counter() - query_start) * 1000
 
-        print(
-            f"Fetched {len(clusters)} tower clusters "
-            f"for zoom {zoom} using grid size {grid_size}"
+        logger.info(
+            "PERF cluster_query duration_ms=%.2f cluster_count=%s zoom=%s "
+            "grid_size=%s bounds=(%s,%s,%s,%s)",
+            query_duration_ms,
+            len(clusters),
+            zoom,
+            grid_size,
+            min_lat,
+            max_lat,
+            min_lon,
+            max_lon,
         )
         return clusters
     except Exception:

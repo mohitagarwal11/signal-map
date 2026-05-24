@@ -1,8 +1,21 @@
 import { getFetchMode } from "./fetchMode";
 import { createViewportKey } from "./viewportKey";
 import { createViewportCache } from "./viewportCache";
+import { expandViewport } from "../../utils/expandViewport";
+import { quantizeViewport } from "../../utils/quantizeViewport";
+import { devLog } from "../../utils/devLog";
 
 const DEFAULT_DEBOUNCE_MS = 300;
+
+const VIEWPORT_EXPANSION_FACTOR = {
+  cluster: 0.3,
+  raw: 0.15,
+};
+
+const VIEWPORT_QUANTIZATION_STEP = {
+  cluster: 0.1,
+  raw: 0.02,
+};
 
 function isAbortError(error) {
   return (
@@ -14,7 +27,6 @@ function isAbortError(error) {
 
 export function createViewportController(config) {
   const {
-    fetchTowerCount,
     fetchClusters,
     fetchRawTowers,
     onData,
@@ -23,13 +35,11 @@ export function createViewportController(config) {
 
   let debounceTimer = null;
   let activeRequest = null;
-  let lastCacheKey = null;
   let requestId = 0;
   const viewportCache = createViewportCache();
   const inFlightRequests = new Map();
 
   const fetchByMode = {
-    count: fetchTowerCount,
     cluster: fetchClusters,
     raw: fetchRawTowers,
   };
@@ -52,6 +62,37 @@ export function createViewportController(config) {
     return `${mode}:${viewportKey}`;
   }
 
+  function getFetchDescriptor({ bounds, zoom, mode = getFetchMode(zoom) }) {
+    const fetchBounds = createFetchBounds(bounds, mode);
+    const viewportKey = createViewportKey(fetchBounds);
+    const cacheKey = createCacheKey(mode, viewportKey);
+
+    return {
+      bounds: fetchBounds,
+      mode,
+      cacheKey,
+    };
+  }
+
+  function createFetchBounds(bounds, mode) {
+    const bufferedBounds = expandViewport(
+      bounds,
+      VIEWPORT_EXPANSION_FACTOR[mode]
+    );
+    const quantizedBounds = quantizeViewport(
+      bufferedBounds,
+      VIEWPORT_QUANTIZATION_STEP[mode]
+    );
+
+    // Fetching ahead of the visible map reduces edge pop-in, while snapping
+    // fetch bounds to stable buckets improves cache reuse during small pans.
+    devLog("ORIGINAL VIEWPORT", bounds);
+    devLog("BUFFERED VIEWPORT", bufferedBounds);
+    devLog("QUANTIZED VIEWPORT", quantizedBounds);
+
+    return quantizedBounds;
+  }
+
   async function executeRequest({ bounds, zoom, mode, cacheKey }) {
     const fetchViewportData = fetchByMode[mode];
 
@@ -60,7 +101,7 @@ export function createViewportController(config) {
     }
 
     if (viewportCache.has(cacheKey)) {
-      console.log("CACHE HIT", cacheKey);
+      devLog("CACHE HIT", cacheKey);
       requestId += 1;
       cancelActiveRequest();
       onData({
@@ -70,10 +111,10 @@ export function createViewportController(config) {
       return;
     }
 
-    console.log("CACHE MISS", cacheKey);
+    devLog("CACHE MISS", cacheKey);
 
     if (inFlightRequests.has(cacheKey)) {
-      console.log("REQUEST REUSED", cacheKey);
+      devLog("REQUEST REUSED", cacheKey);
 
       const currentRequestId = requestId + 1;
       requestId = currentRequestId;
@@ -147,19 +188,20 @@ export function createViewportController(config) {
     clearDebounce();
 
     debounceTimer = window.setTimeout(() => {
-      const viewportKey = createViewportKey(bounds);
-      const mode = getFetchMode(zoom);
-      const cacheKey = createCacheKey(mode, viewportKey);
+      const descriptor = getFetchDescriptor({ bounds, zoom });
 
-      if (cacheKey === lastCacheKey && viewportCache.has(cacheKey)) {
-        return;
-      }
-
-      lastCacheKey = cacheKey;
-      executeRequest({ bounds, zoom, mode, cacheKey }).catch((error) => {
-        console.log("Error fetching viewport data:", error);
-      });
+      executeRequest({ ...descriptor, zoom }).catch(
+        (error) => {
+          devLog("Error fetching viewport data:", error);
+        }
+      );
     }, debounceMs);
+  }
+
+  function hydrateViewport({ bounds, zoom, mode, data }) {
+    const { cacheKey } = getFetchDescriptor({ bounds, zoom, mode });
+    viewportCache.set(cacheKey, data);
+    devLog("CACHE HYDRATED", cacheKey);
   }
 
   function destroy() {
@@ -171,6 +213,7 @@ export function createViewportController(config) {
 
   return {
     handleViewportChange,
+    hydrateViewport,
     destroy,
   };
 }

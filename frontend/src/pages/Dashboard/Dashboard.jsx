@@ -117,7 +117,7 @@ const DEFAULT_PANEL = {
 export default function Dashboard() {
   const [panelData] = useState(DEFAULT_PANEL);
 
-  const [towerCount, setTowerCount] = useState(0);
+  const [towerCount] = useState(0);
   const [mapCenter, setMapCenter] = useState({ lat: 23.0, lon: 85.0 });
 
   const [searchVal, setSearchVal] = useState("");
@@ -224,7 +224,6 @@ export default function Dashboard() {
 
           {/* map */}
           <Map
-            setTowerCount={setTowerCount}
             setMapCenter={setMapCenter}
           />
 
