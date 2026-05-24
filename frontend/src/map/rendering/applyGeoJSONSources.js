@@ -1,17 +1,10 @@
 import { devLog } from "../../utils/devLog";
-
 import { HEATMAP_SOURCE_ID } from "../constants/layerIds";
-
 import { getClusterLayerConfig } from "../layers/getClusterLayerConfig";
-
 import { getRawTowerLayerConfig } from "../layers/getRawTowerLayerConfig";
-
 import { getMapSource } from "../sources/getMapSource";
-
 import { updateGeoJSONSource } from "../sources/updateGeoJSONSource";
-
 import { updateHeatmapSource } from "../sources/updateHeatmapSource";
-
 import { getZoomValue } from "../utils/getZoomValue";
 
 export function applyGeoJSONSources({ map, renderState }) {

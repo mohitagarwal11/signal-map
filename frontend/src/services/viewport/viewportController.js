@@ -86,9 +86,9 @@ export function createViewportController(config) {
 
     // Fetching ahead of the visible map reduces edge pop-in, while snapping
     // fetch bounds to stable buckets improves cache reuse during small pans.
-    devLog("ORIGINAL VIEWPORT", bounds);
-    devLog("BUFFERED VIEWPORT", bufferedBounds);
-    devLog("QUANTIZED VIEWPORT", quantizedBounds);
+    // devLog("ORIGINAL VIEWPORT", bounds);
+    // devLog("BUFFERED VIEWPORT", bufferedBounds);
+    // devLog("QUANTIZED VIEWPORT", quantizedBounds);
 
     return quantizedBounds;
   }

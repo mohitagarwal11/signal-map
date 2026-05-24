@@ -1,17 +1,12 @@
 import { devLog } from "../../utils/devLog";
-
 import {
   CLUSTER_LAYER_ID,
   HEATMAP_LAYER_ID,
   RAW_TOWER_LAYER_ID,
 } from "../constants/layerIds";
-
 import { deriveVisibility } from "./deriveVisibility";
-
 import { setLayerVisibility } from "./setLayerVisibility";
-
 import { getMapLayer } from "../sources/getMapLayer";
-
 import { getZoomValue } from "../utils/getZoomValue";
 
 export function applyVisibility({ map, renderState }) {
@@ -19,7 +14,6 @@ export function applyVisibility({ map, renderState }) {
 
   const { clusterVisible, heatmapVisible, rawVisible } = deriveVisibility({
     zoom,
-
     heatmapAvailable: renderState.heatmapAvailable,
   });
 

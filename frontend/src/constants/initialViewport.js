@@ -5,4 +5,4 @@ export const INITIAL_VIEWPORT_BOUNDS = {
   max_lon: 103,
 };
 
-export const INITIAL_VIEWPORT_ZOOM = 3.75;
+export const INITIAL_VIEWPORT_ZOOM = 4;

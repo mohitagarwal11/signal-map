@@ -1,10 +1,7 @@
 import { devLog } from "../../utils/devLog";
-
 import { EMPTY_GEOJSON } from "../constants/renderConstants";
-
 import { getMapLayer } from "../sources/getMapLayer";
 import { getMapSource } from "../sources/getMapSource";
-
 import { isMapStyleReady } from "../utils/isMapStyleReady";
 
 export function addMapLayer(map, layer, fallbackLayer) {
