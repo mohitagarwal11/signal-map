@@ -27,35 +27,7 @@ const EMPTY_GEOJSON = {
   features: [],
 };
 
-const CLUSTER_OPACITY_WITH_HEATMAP = [
-  "interpolate",
-  ["linear"],
-  ["zoom"],
-  3,
-  0,
-  5,
-  0,
-  6,
-  0.22,
-  7,
-  0.48,
-  10,
-  0.72,
-];
-
-const CLUSTER_OPACITY_FALLBACK = [
-  "interpolate",
-  ["linear"],
-  ["zoom"],
-  3,
-  0.14,
-  5,
-  0.26,
-  7,
-  0.48,
-  10,
-  0.72,
-];
+const CLUSTER_OPACITY_WITH_HEATMAP = 0.9;
 
 const CLUSTER_LAYER = {
   id: CLUSTER_LAYER_ID,
@@ -157,46 +129,10 @@ const CLUSTER_LAYER = {
       ],
     ],
     "circle-opacity": CLUSTER_OPACITY_WITH_HEATMAP,
-    "circle-blur": [
-      "interpolate",
-      ["linear"],
-      ["zoom"],
-      3,
-      0.8,
-      5,
-      0.55,
-      7,
-      0.18,
-      10,
-      0,
-    ],
+    "circle-blur": 0,
     "circle-stroke-color": "#ffffff",
-    "circle-stroke-width": [
-      "interpolate",
-      ["linear"],
-      ["zoom"],
-      3,
-      0,
-      5,
-      0,
-      7,
-      0.45,
-      10,
-      1.4,
-    ],
-    "circle-stroke-opacity": [
-      "interpolate",
-      ["linear"],
-      ["zoom"],
-      3,
-      0,
-      5,
-      0,
-      7,
-      0.35,
-      10,
-      0.82,
-    ],
+    "circle-stroke-width": 2,
+    "circle-stroke-opacity": 1,
   },
   layout: {
     visibility: "none",
@@ -208,10 +144,11 @@ const CLUSTER_LAYER_FALLBACK = {
   paint: {
     "circle-radius": 16,
     "circle-color": "#18b7a8",
-    "circle-opacity": 0.42,
+    "circle-opacity": 0.9,
+    "circle-blur": 0,
     "circle-stroke-color": "#ffffff",
-    "circle-stroke-width": 0.5,
-    "circle-stroke-opacity": 0.35,
+    "circle-stroke-width": 2,
+    "circle-stroke-opacity": 1,
   },
 };
 
@@ -219,72 +156,97 @@ const HEATMAP_LAYER = {
   id: HEATMAP_LAYER_ID,
   type: "heatmap",
   source: HEATMAP_SOURCE_ID,
-  maxzoom: 6,
+  maxzoom: 5.2,
+
   paint: {
     "heatmap-weight": [
       "interpolate",
       ["linear"],
-      ["get", "tower_count"],
-      1,
+      ["ln", ["+", ["get", "tower_count"], 1]],
+
       0,
-      500,
-      0.35,
-      5000,
-      0.7,
-      50000,
+      0,
+      2,
+      0.1,
+      4,
+      0.25,
+      6,
+      0.5,
+      8,
+      0.78,
+      10,
       1,
     ],
+
+    // Main visual energy
     "heatmap-intensity": [
       "interpolate",
       ["linear"],
       ["zoom"],
-      3,
-      0.6,
+
+      4,
+      1.6,
+      4.5,
+      2,
       5,
-      0.9,
-      6,
-      1.05,
+      2.5,
     ],
+
+    // Controls smoothing
     "heatmap-radius": [
       "interpolate",
       ["linear"],
       ["zoom"],
-      3,
-      14,
+
+      4,
+      40,
+      4.5,
+      58,
       5,
-      26,
-      6,
-      34,
+      76,
     ],
+
+    // Fade into clusters
     "heatmap-opacity": [
       "interpolate",
       ["linear"],
       ["zoom"],
-      3,
-      0.32,
+
+      4,
+      0.92,
+      4.7,
+      0.72,
       5,
-      0.46,
-      6,
       0,
     ],
+
+    // Density ramp
     "heatmap-color": [
       "interpolate",
       ["linear"],
       ["heatmap-density"],
-      0,
+
+      0.0,
       "rgba(0,0,0,0)",
+      0.08,
+      "rgba(90,90,255,0.20)",
       0.2,
-      "#a4e5dd",
-      0.45,
-      "#5fcfc4",
-      0.7,
-      "#2d9d97",
-      1,
-      "#0b5f67",
+      "#4f6df5",
+      0.38,
+      "#42d4c8",
+      0.56,
+      "#6fe35b",
+      0.74,
+      "#d7ea46",
+      0.88,
+      "#ffb340",
+      1.0,
+      "#ff4d4d",
     ],
   },
+
   layout: {
-    visibility: "none",
+    visibility: "visible",
   },
 };
 
@@ -293,12 +255,12 @@ const RAW_TOWER_LAYER = {
   type: "circle",
   source: RAW_TOWER_SOURCE_ID,
   paint: {
-    "circle-radius": 3,
-    "circle-color": "#f15b5b",
-    "circle-opacity": 0.8,
-    "circle-stroke-color": "#ffffff",
-    "circle-stroke-width": 0.5,
-    "circle-stroke-opacity": 0.6,
+    "circle-radius": 6,
+    "circle-color": "#ff2d2d",
+    "circle-opacity": 0.95,
+    "circle-stroke-color": "#000000",
+    "circle-stroke-width": 1.5,
+    "circle-stroke-opacity": 1,
   },
   layout: {
     visibility: "none",
@@ -322,16 +284,15 @@ function getMapLayer(map, layerId) {
 }
 
 function getLayerVisibility(map, layerId) {
-  if (!map || typeof map.getLayoutProperty !== "function") {
-    return "unknown";
+  if (!map || !getMapLayer(map, layerId)) {
+    return "missing";
   }
 
-  try {
-    return map.getLayoutProperty(layerId, "visibility");
-  } catch (error) {
-    devLog("Layer visibility check failed:", error);
-    return "unknown";
+  if (typeof map.getLayoutProperty === "function") {
+    return map.getLayoutProperty(layerId, "visibility") ?? "unknown";
   }
+
+  return "unknown";
 }
 
 function getZoomValue(map) {
@@ -424,7 +385,9 @@ function ensureHeatmapLayer({
         : undefined;
       map.addLayer(layer, beforeLayerId);
     } catch (error) {
-      devLog("Heatmap layer unsupported; falling back to clusters only.", error);
+      devLog("Heatmap layer unsupported; falling back to clusters only.", {
+        error: error?.message ?? error,
+      });
       return false;
     }
   }
@@ -444,10 +407,6 @@ function ensureHeatmapLayer({
 }
 
 function updateGeoJSONSource(config, geoJSON) {
-  if (!ensureGeoJSONLayer({ ...config, data: geoJSON })) {
-    return;
-  }
-
   const source = getMapSource(config.map, config.sourceId);
 
   if (source && typeof source.setData === "function") {
@@ -496,18 +455,18 @@ function setLayerVisibility(
   }
 }
 
-function applyClusterOpacityFallback(map) {
-  if (!map || !getMapLayer(map, CLUSTER_LAYER_ID)) {
-    return;
-  }
+function deriveVisibility({ zoom, heatmapAvailable }) {
+  const numericZoom = typeof zoom === "number" ? zoom : 0;
+  const isHeatmapZoom = numericZoom < 5;
+  const isClusterZoom = numericZoom >= 5 && numericZoom < 11;
+  const isRawZoom = numericZoom >= 11;
+  const heatmapVisible = heatmapAvailable && isHeatmapZoom;
 
-  if (typeof map.setPaintProperty === "function") {
-    map.setPaintProperty(
-      CLUSTER_LAYER_ID,
-      "circle-opacity",
-      CLUSTER_OPACITY_FALLBACK,
-    );
-  }
+  return {
+    clusterVisible: (!heatmapAvailable && isHeatmapZoom) || isClusterZoom,
+    heatmapVisible,
+    rawVisible: isRawZoom,
+  };
 }
 
 function removeGeoJSONLayerResources(map, sourceId, layerId) {
@@ -569,12 +528,14 @@ export default function Map({ setMapCenter }) {
 
     if (!mapplsClient) return;
 
-    let latestClusterGeoJSON = EMPTY_GEOJSON;
-    let latestRawTowerGeoJSON = EMPTY_GEOJSON;
-    let latestMode = "cluster";
-    let latestLayerMode = null;
-    let heatmapSupported = true;
-    let clusterOpacityFallbackApplied = false;
+    const renderState = {
+      mapReady: false,
+      layersInitialized: false,
+      mode: "cluster",
+      heatmapAvailable: true,
+      clusterGeoJSON: EMPTY_GEOJSON,
+      rawGeoJSON: EMPTY_GEOJSON,
+    };
 
     const fetchClusters = async ({ bounds, zoom, signal }) => {
       const fetchStart = performance.now();
@@ -611,29 +572,16 @@ export default function Map({ setMapCenter }) {
     };
 
     const updateHeatmapSource = (map, geoJSON) => {
-      if (!heatmapSupported) {
-        return;
-      }
+      const source = getMapSource(map, HEATMAP_SOURCE_ID);
 
-      const heatmapReady = ensureHeatmapLayer({
-        ...getHeatmapLayerConfig(map),
-        data: geoJSON,
-      });
-
-      if (heatmapReady === false) {
-        heatmapSupported = false;
-        clusterOpacityFallbackApplied = false;
-        devLog("Heatmap disabled; using cluster circles only.", {
+      if (!source) {
+        devLog("HEATMAP_SOURCE_MISSING", {
+          layerId: HEATMAP_LAYER_ID,
+          featureCount: geoJSON.features.length,
           zoom: getZoomValue(map),
         });
         return;
       }
-
-      if (!heatmapReady) {
-        return;
-      }
-
-      const source = getMapSource(map, HEATMAP_SOURCE_ID);
 
       if (source && typeof source.setData === "function") {
         const setDataStart = performance.now();
@@ -648,69 +596,113 @@ export default function Map({ setMapCenter }) {
       }
     };
 
-    const updateClusterSources = (map, geoJSON) => {
-      updateHeatmapSource(map, geoJSON);
-      updateGeoJSONSource(getClusterLayerConfig(map), geoJSON);
-
-      if (!heatmapSupported && !clusterOpacityFallbackApplied) {
-        applyClusterOpacityFallback(map);
-        clusterOpacityFallbackApplied = true;
+    const initializeLayersOnce = (map) => {
+      if (!map || !isMapStyleReady(map)) {
+        return false;
       }
 
-      devLog("VIS cluster_state", {
-        heatmapSupported,
-        clusterLayerExists: Boolean(getMapLayer(map, CLUSTER_LAYER_ID)),
-        heatmapLayerExists: Boolean(getMapLayer(map, HEATMAP_LAYER_ID)),
-        clusterFeatureCount: geoJSON.features.length,
-        zoom: getZoomValue(map),
-        clusterVisibility: getLayerVisibility(map, CLUSTER_LAYER_ID),
-        heatmapVisibility: getLayerVisibility(map, HEATMAP_LAYER_ID),
+      const clusterReady = ensureGeoJSONLayer({
+        ...getClusterLayerConfig(map),
+        data: renderState.clusterGeoJSON,
       });
+      const rawReady = ensureGeoJSONLayer({
+        ...getRawTowerLayerConfig(map),
+        data: renderState.rawGeoJSON,
+      });
+
+      if (renderState.heatmapAvailable) {
+        const heatmapReady = ensureHeatmapLayer({
+          ...getHeatmapLayerConfig(map),
+          data: renderState.clusterGeoJSON,
+        });
+        if (heatmapReady === false) {
+          renderState.heatmapAvailable = false;
+          devLog("Heatmap disabled; using cluster circles only.", {
+            zoom: getZoomValue(map),
+          });
+        }
+      }
+
+      renderState.layersInitialized = clusterReady && rawReady;
+      return renderState.layersInitialized;
     };
 
-    const updateLayerVisibility = (map, mode) => {
-      if (!map || mode === latestLayerMode) {
-        return;
+    const applyGeoJSONSources = (map) => {
+      updateGeoJSONSource(
+        getClusterLayerConfig(map),
+        renderState.clusterGeoJSON,
+      );
+      updateGeoJSONSource(getRawTowerLayerConfig(map), renderState.rawGeoJSON);
+      const heatmapSourcePresent = Boolean(
+        getMapSource(map, HEATMAP_SOURCE_ID),
+      );
+      if (renderState.heatmapAvailable || heatmapSourcePresent) {
+        updateHeatmapSource(map, renderState.clusterGeoJSON);
+      } else {
+        devLog("HEATMAP_UPDATE_SKIPPED", {
+          zoom: getZoomValue(map),
+        });
       }
+    };
 
-      const transitionStart = performance.now();
-      const isClusterMode = mode === "cluster";
-      const isRawMode = mode === "raw";
+    const applyVisibility = (map) => {
+      const zoom = getZoomValue(map);
+      const { clusterVisible, heatmapVisible, rawVisible } = deriveVisibility({
+        zoom,
+        heatmapAvailable: renderState.heatmapAvailable,
+      });
 
-      if (!heatmapSupported && !clusterOpacityFallbackApplied) {
-        applyClusterOpacityFallback(map);
-        clusterOpacityFallbackApplied = true;
-      }
-
-      setLayerVisibility(map, CLUSTER_LAYER_ID, isClusterMode, 0.7);
-      if (heatmapSupported) {
+      setLayerVisibility(map, CLUSTER_LAYER_ID, clusterVisible, 0.9);
+      if (renderState.heatmapAvailable) {
         setLayerVisibility(
           map,
           HEATMAP_LAYER_ID,
-          isClusterMode,
-          0.45,
+          heatmapVisible,
+          0.85,
           "heatmap-opacity",
         );
       }
-      setLayerVisibility(map, RAW_TOWER_LAYER_ID, isRawMode, 0.8);
+      setLayerVisibility(map, RAW_TOWER_LAYER_ID, rawVisible, 0.95);
 
-      const transitionDuration = performance.now() - transitionStart;
-      devLog("PERF layer_transition", {
-        from: latestLayerMode ?? "none",
-        to: mode,
-        zoom: Number(map.getZoom().toFixed(2)),
-        durationMs: Number(transitionDuration.toFixed(2)),
-        heatmapSupported,
+      devLog("VISIBILITY_STATE", {
+        mode: renderState.mode,
+        zoom,
+        clusterVisible,
+        heatmapVisible,
+        rawVisible,
+        rawLayerPresent: Boolean(getMapLayer(map, RAW_TOWER_LAYER_ID)),
       });
-      devLog("VIS layer_visibility", {
-        zoom: Number(map.getZoom().toFixed(2)),
-        heatmapSupported,
-        clusterVisibility: getLayerVisibility(map, CLUSTER_LAYER_ID),
-        heatmapVisibility: getLayerVisibility(map, HEATMAP_LAYER_ID),
-        rawVisibility: getLayerVisibility(map, RAW_TOWER_LAYER_ID),
-      });
+    };
 
-      latestLayerMode = mode;
+    const logHeatmapLayerStatus = (map) => {
+      const heatmapLayer = getMapLayer(map, HEATMAP_LAYER_ID);
+      devLog("HEATMAP_LAYER_STATUS", {
+        sourcePresent: Boolean(getMapSource(map, HEATMAP_SOURCE_ID)),
+        layerPresent: Boolean(heatmapLayer),
+        featureCount: renderState.clusterGeoJSON.features.length,
+        layerType: heatmapLayer?.type ?? "none",
+        visibility: getLayerVisibility(map, HEATMAP_LAYER_ID),
+        zoom: getZoomValue(map),
+      });
+    };
+
+    const renderMap = () => {
+      const map = mapRef.current;
+      if (!map || !renderState.mapReady || !isMapStyleReady(map)) {
+        return;
+      }
+
+      initializeLayersOnce(map);
+      devLog("RAW_LAYER_STATUS", {
+        mode: renderState.mode,
+        zoom: getZoomValue(map),
+        rawFeatureCount: renderState.rawGeoJSON.features.length,
+        rawSourcePresent: Boolean(getMapSource(map, RAW_TOWER_SOURCE_ID)),
+        rawLayerPresent: Boolean(getMapLayer(map, RAW_TOWER_LAYER_ID)),
+      });
+      applyGeoJSONSources(map);
+      applyVisibility(map);
+      logHeatmapLayerStatus(map);
     };
 
     const viewportController = createViewportController({
@@ -718,23 +710,17 @@ export default function Map({ setMapCenter }) {
       fetchRawTowers,
       debounceMs: 300,
       onData: ({ mode, data }) => {
-        const map = mapRef.current;
-        latestMode = mode;
+        renderState.mode = mode;
 
         if (mode === "cluster") {
-          latestClusterGeoJSON = clustersToGeoJSON(data);
-          updateClusterSources(map, latestClusterGeoJSON);
-          updateLayerVisibility(map, "cluster");
+          renderState.clusterGeoJSON = clustersToGeoJSON(data);
+          renderMap();
           return;
         }
 
         if (mode === "raw") {
-          latestRawTowerGeoJSON = towersToGeoJSON(data);
-          updateGeoJSONSource(
-            getRawTowerLayerConfig(map),
-            latestRawTowerGeoJSON,
-          );
-          updateLayerVisibility(map, "raw");
+          renderState.rawGeoJSON = towersToGeoJSON(data);
+          renderMap();
         }
       },
     });
@@ -742,7 +728,7 @@ export default function Map({ setMapCenter }) {
     const map = new mapplsClient.Map("map", {
       center: getInitialViewportCenter(),
       zoom: INITIAL_VIEWPORT_ZOOM,
-      minZoom: 3.75,
+      minZoom: 4,
       maxZoom: 15,
       fullscreenControl: false,
       rotateControl: false,
@@ -773,17 +759,15 @@ export default function Map({ setMapCenter }) {
           return;
         }
 
-        latestMode = "cluster";
-        latestClusterGeoJSON = clustersToGeoJSON(snapshot.clusters);
+        renderState.mode = "cluster";
+        renderState.clusterGeoJSON = clustersToGeoJSON(snapshot.clusters);
         viewportController.hydrateViewport({
           bounds: snapshot.bounds,
           zoom: snapshot.zoom,
           mode: "cluster",
           data: snapshot.clusters,
         });
-
-        updateClusterSources(map, latestClusterGeoJSON);
-        updateLayerVisibility(map, "cluster");
+        renderMap();
 
         const startupDuration = performance.now() - startupStart;
         devLog("PERF initial_snapshot_render", {
@@ -797,10 +781,8 @@ export default function Map({ setMapCenter }) {
     };
 
     const handleMapLoad = () => {
-      updateClusterSources(map, latestClusterGeoJSON);
-      updateGeoJSONSource(getRawTowerLayerConfig(map), latestRawTowerGeoJSON);
-
-      updateLayerVisibility(map, latestMode);
+      renderState.mapReady = true;
+      renderMap();
     };
 
     const requestViewportData = () => {
