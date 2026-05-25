@@ -9,13 +9,11 @@ import { devLog } from "../../utils/devLog";
 const DEFAULT_DEBOUNCE_MS = 300;
 
 const VIEWPORT_EXPANSION_FACTOR = {
-  heatmap: 0.4,
   density: 0.3,
   raw: 0.15,
 };
 
 const VIEWPORT_QUANTIZATION_STEP = {
-  heatmap: 0.25,
   density: 0.1,
   raw: 0.02,
 };
@@ -30,7 +28,7 @@ function isAbortError(error) {
 
 export function createViewportController(config) {
   const {
-    fetchHeatmapPoints,
+    fetchDensityPoints,
     fetchRawTowers,
     onData,
     debounceMs = DEFAULT_DEBOUNCE_MS,
@@ -43,7 +41,7 @@ export function createViewportController(config) {
   const inFlightRequests = new Map();
 
   const fetchByMode = {
-    heatmap: fetchHeatmapPoints,
+    density: fetchDensityPoints,
     raw: fetchRawTowers,
   };
 

@@ -14,11 +14,11 @@ import { createRenderState } from "../map/state/createRenderState";
 import { renderMap } from "../map/rendering/renderMap";
 import { hydrateInitialSnapshot } from "../map/bootstrap/hydrateInitialSnapshot";
 import { getViewport } from "../utils/getViewport";
-import { DENToGeoJSON } from "../utils/densityToGeoJSON";
+import { densityToGeoJSON } from "../utils/densityToGeoJSON";
+import { heatmapPointsToGeoJSON } from "../utils/heatmapPointsToGeoJSON";
 import { towersToGeoJSON } from "../utils/towersToGeoJSON";
 import { getTowersData, getHeatmapPoints } from "../api/towers.api";
 import { createViewportController } from "../services/viewport/viewportController";
-import { heatmapPointsToGeoJSON } from "../utils/heatmapPointsToGeoJSON";
 
 import { devLog } from "../utils/devLog";
 
@@ -30,12 +30,15 @@ export default function Map({ setMapCenter, setTowerCount }) {
 
     const renderState = createRenderState();
 
-    const fetchHeatmapPoints = async ({ bounds, zoom, signal }) => {
+    const fetchDensityPoints = async ({ bounds, zoom, signal }) => {
       const fetchStart = performance.now();
+      // Backend endpoint currently named /towers/heatmap; this wrapper names
+      // the operation correctly as a density fetch while reusing the existing
+      // API until backend renames are made.
       const response = await getHeatmapPoints(bounds, zoom, signal);
       const fetchDuration = performance.now() - fetchStart;
 
-      devLog("PERF heatmap_fetch", {
+      devLog("PERF density_fetch", {
         durationMs: Number(fetchDuration.toFixed(2)),
         pointCount: response.data.length,
         zoom,
@@ -84,32 +87,37 @@ export default function Map({ setMapCenter, setTowerCount }) {
     const map = new mapplsClient.Map("map", INITIAL_MAP_CONFIG);
 
     const viewportController = createViewportController({
-      fetchHeatmapPoints,
+      fetchDensityPoints,
       fetchRawTowers,
       debounceMs: 300,
       onData: ({ mode, data }) => {
-        renderState.mode = mode;
-
-        if (mode === "heatmap") {
-          renderState.heatmapGeoJSON = heatmapPointsToGeoJSON(data);
-          renderState.heatmapAvailable = true;
-          renderMap({
-            map,
-            renderState,
-          });
-          return;
-        }
+        // `mode` here is the fetch type emitted by the viewport controller
+        // (now either 'density' or 'raw'). Record it in the canonical
+        // `fetchMode` property rather than conflating with renderer `mode`.
+        renderState.fetchMode = mode;
 
         if (mode === "density") {
-          renderState.densityGeoJSON = heatmapPointsToGeoJSON(data);
-          renderMap({
-            map,
-            renderState,
-          });
+          // Prefer densityToGeoJSON when incoming data contains aggregated
+          // density properties; otherwise fall back to the legacy converter.
+          const useDensityConverter =
+            Array.isArray(data) &&
+            data.length > 0 &&
+            Object.prototype.hasOwnProperty.call(data[0], "tower_count");
+
+          renderState.densityGeoJSON = useDensityConverter
+            ? densityToGeoJSON(data)
+            : heatmapPointsToGeoJSON(data);
+
+          renderState.densityAvailable = true;
+          renderState.rawAvailable = false;
+
+          renderMap({ map, renderState });
+
           return;
         }
 
         if (mode === "raw") {
+          renderState.rawAvailable = Array.isArray(data) && data.length > 0;
           renderState.rawGeoJSON = towersToGeoJSON(data);
           renderMap({
             map,

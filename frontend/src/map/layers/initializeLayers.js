@@ -10,7 +10,8 @@ export function initializeLayers({ map, renderState }) {
 
   const heatmapReady = ensureSourceLayer({
     ...getHeatmapLayerConfig(map),
-    data: renderState.heatmapGeoJSON,
+    // Heatmap renderer consumes the canonical `densityGeoJSON` dataset.
+    data: renderState.densityGeoJSON,
   });
 
   const densityReady = ensureSourceLayer({

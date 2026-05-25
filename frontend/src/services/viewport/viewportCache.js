@@ -1,7 +1,7 @@
 const MAX_CACHE_ENTRIES = 100;
 
 const CACHE_TTL_MS = {
-  cluster: 60_000,
+  density: 60_000,
   raw: 20_000,
 };
 
