@@ -9,7 +9,7 @@ export function createRenderState() {
     heatmapAvailable: false,
 
     heatmapGeoJSON: EMPTY_GEOJSON,
-    clusterGeoJSON: EMPTY_GEOJSON,
+    densityGeoJSON: EMPTY_GEOJSON,
     rawGeoJSON: EMPTY_GEOJSON,
   };
 }

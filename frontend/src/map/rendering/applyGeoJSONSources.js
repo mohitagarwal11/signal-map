@@ -1,11 +1,11 @@
 import { updateHeatmapSource } from "../sources/updateHeatmapSource";
-import { updateClusterSource } from "../sources/updateClusterSource";
+import { updateDensitySource } from "../sources/updateDensitySource";
 import { updateRawSource } from "../sources/updateRawSource";
 
 export function applyGeoJSONSources({ map, renderState }) {
   updateHeatmapSource(map, renderState.heatmapGeoJSON);
 
-  updateClusterSource(map, renderState.clusterGeoJSON);
+  updateDensitySource(map, renderState.densityGeoJSON);
 
   updateRawSource(map, renderState.rawGeoJSON);
 }

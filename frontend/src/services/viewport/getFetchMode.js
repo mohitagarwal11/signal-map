@@ -1,10 +1,10 @@
 export function getFetchMode(zoom) {
-  if (zoom < 5) {
+  if (zoom < 8) {
     return "heatmap";
   }
 
   if (zoom < 11) {
-    return "cluster";
+    return "density";
   }
 
   return "raw";

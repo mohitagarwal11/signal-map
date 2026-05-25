@@ -9,7 +9,6 @@ export const HEATMAP_LAYER = {
   paint: {
     "heatmap-weight": 1,
 
-    // Main visual energy
     "heatmap-intensity": [
       "interpolate",
       ["linear"],
@@ -22,10 +21,9 @@ export const HEATMAP_LAYER = {
       1,
     ],
 
-    // Controls smoothing
     "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 18],
 
-    // Fade into clusters
+
     "heatmap-opacity": [
       "interpolate",
       ["linear"],
@@ -40,7 +38,6 @@ export const HEATMAP_LAYER = {
       0,
     ],
 
-    // Density ramp
     "heatmap-color": [
       "interpolate",
       ["linear"],

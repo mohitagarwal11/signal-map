@@ -1,9 +1,8 @@
 import { heatmapPointsToGeoJSON } from "../../utils/heatmapPointsToGeoJSON";
-// import { INITIAL_CLUSTER_SNAPSHOT } from "../../constants/initialClusters";
 import { INITIAL_HEATMAP_SNAPSHOT } from "../../constants/initialHeatmap";
 
 export function hydrateInitialSnapshot({ renderState, viewportController }) {
-  renderState.mode = "cluster";
+  renderState.mode = "heatmap";
 
   renderState.heatmapGeoJSON = heatmapPointsToGeoJSON(
     INITIAL_HEATMAP_SNAPSHOT.points,

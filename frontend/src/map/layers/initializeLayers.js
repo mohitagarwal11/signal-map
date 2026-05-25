@@ -1,5 +1,5 @@
 import { ensureSourceLayer } from "./ensureSourceLayer";
-import { getClusterLayerConfig } from "./getClusterLayerConfig";
+import { getDensityLayerConfig } from "./getDensityLayerConfig";
 import { getHeatmapLayerConfig } from "./getHeatmapLayerConfig";
 import { getRawTowerLayerConfig } from "./getRawTowerLayerConfig";
 
@@ -13,9 +13,9 @@ export function initializeLayers({ map, renderState }) {
     data: renderState.heatmapGeoJSON,
   });
 
-  const clusterReady = ensureSourceLayer({
-    ...getClusterLayerConfig(map),
-    data: renderState.clusterGeoJSON,
+  const densityReady = ensureSourceLayer({
+    ...getDensityLayerConfig(map),
+    data: renderState.densityGeoJSON,
   });
 
   const rawReady = ensureSourceLayer({
@@ -23,7 +23,7 @@ export function initializeLayers({ map, renderState }) {
     data: renderState.rawGeoJSON,
   });
 
-  renderState.layersInitialized = clusterReady && rawReady && heatmapReady;
+  renderState.layersInitialized = densityReady && rawReady && heatmapReady;
 
   return renderState.layersInitialized;
 }

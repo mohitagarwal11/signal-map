@@ -1,6 +1,6 @@
 import { devLog } from "../../utils/devLog";
 import {
-  CLUSTER_LAYER_ID,
+  DENSITY_LAYER_ID,
   HEATMAP_LAYER_ID,
   RAW_TOWER_LAYER_ID,
 } from "../constants/layerIds";
@@ -12,12 +12,12 @@ import { getZoomValue } from "../utils/getZoomValue";
 export function applyVisibility({ map, renderState }) {
   const zoom = getZoomValue(map);
 
-  const { clusterVisible, heatmapVisible, rawVisible } = deriveVisibility({
+  const { densityVisible, heatmapVisible, rawVisible } = deriveVisibility({
     zoom,
     heatmapAvailable: renderState.heatmapAvailable,
   });
 
-  setLayerVisibility(map, CLUSTER_LAYER_ID, clusterVisible, 0.9);
+  setLayerVisibility(map, DENSITY_LAYER_ID, densityVisible, 0.9);
 
   if (renderState.heatmapAvailable) {
     setLayerVisibility(
@@ -34,7 +34,7 @@ export function applyVisibility({ map, renderState }) {
   devLog("VISIBILITY_STATE", {
     mode: renderState.mode,
     zoom,
-    clusterVisible,
+    densityVisible,
     heatmapVisible,
     rawVisible,
     rawLayerPresent: Boolean(getMapLayer(map, RAW_TOWER_LAYER_ID)),

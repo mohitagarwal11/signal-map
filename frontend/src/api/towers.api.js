@@ -40,25 +40,6 @@ export const getTowerCount = async (bounds, options = {}) => {
   }
 };
 
-export const getTowerClusters = async (bounds, zoom, signal) => {
-  try {
-    const response = await axios.get(`${BACKEND_URL}/towers/clusters`, {
-      signal,
-      params: {
-        min_lat: bounds.min_lat,
-        max_lat: bounds.max_lat,
-        min_lon: bounds.min_lon,
-        max_lon: bounds.max_lon,
-        zoom,
-      },
-    });
-    return response;
-  } catch (error) {
-    console.log("Error fetching tower clusters:", error);
-    throw error;
-  }
-};
-
 export const getHeatmapPoints = async (bounds, zoom, signal) => {
   try {
     const response = await axios.get(`${BACKEND_URL}/towers/heatmap`, {

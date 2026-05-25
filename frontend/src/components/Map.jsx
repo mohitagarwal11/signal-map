@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { INITIAL_MAP_CONFIG } from "../map/config/mapConfig";
 import {
-  CLUSTER_SOURCE_ID,
-  CLUSTER_LAYER_ID,
+  DENSITY_SOURCE_ID,
+  DENSITY_LAYER_ID,
   HEATMAP_SOURCE_ID,
   HEATMAP_LAYER_ID,
   RAW_TOWER_SOURCE_ID,
@@ -14,40 +14,21 @@ import { createRenderState } from "../map/state/createRenderState";
 import { renderMap } from "../map/rendering/renderMap";
 import { hydrateInitialSnapshot } from "../map/bootstrap/hydrateInitialSnapshot";
 import { getViewport } from "../utils/getViewport";
-import { clustersToGeoJSON } from "../utils/clustersToGeoJSON";
+import { DENToGeoJSON } from "../utils/densityToGeoJSON";
 import { towersToGeoJSON } from "../utils/towersToGeoJSON";
-import { getTowerClusters, getTowersData } from "../api/towers.api";
+import { getTowersData, getHeatmapPoints } from "../api/towers.api";
 import { createViewportController } from "../services/viewport/viewportController";
-import { getHeatmapPoints } from "../api/towers.api";
 import { heatmapPointsToGeoJSON } from "../utils/heatmapPointsToGeoJSON";
 
 import { devLog } from "../utils/devLog";
 
 export default function Map({ setMapCenter, setTowerCount }) {
-  // const [densityData, setDensityData] = useState(null);
-  // const [clusterData, setClusterData] = useState(null);
-  // const [rawData, setRawData] = useState(null);
-
   useEffect(() => {
     const mapplsClient = window.mappls;
 
     if (!mapplsClient) return;
 
     const renderState = createRenderState();
-
-    const fetchClusters = async ({ bounds, zoom, signal }) => {
-      const fetchStart = performance.now();
-      const response = await getTowerClusters(bounds, zoom, signal);
-      const fetchDuration = performance.now() - fetchStart;
-
-      devLog("PERF cluster_fetch", {
-        durationMs: Number(fetchDuration.toFixed(2)),
-        clusterCount: response.data.length,
-        zoom,
-      });
-
-      return response.data;
-    };
 
     const fetchHeatmapPoints = async ({ bounds, zoom, signal }) => {
       const fetchStart = performance.now();
@@ -62,6 +43,21 @@ export default function Map({ setMapCenter, setTowerCount }) {
 
       return response.data;
     };
+
+    // name for the time being
+    // const fetchClusters = async ({ bounds, zoom, signal }) => {
+    //   const fetchStart = performance.now();
+    //   const response = await getHeatmapPoints(bounds, zoom, signal);
+    //   const fetchDuration = performance.now() - fetchStart;
+
+    //   devLog("PERF density_fetch", {
+    //     durationMs: Number(fetchDuration.toFixed(2)),
+    //     pointCount: response.data.length,
+    //     zoom,
+    //   });
+
+    //   return response.data;
+    // };
 
     const fetchRawTowers = async ({ bounds, signal }) => {
       const fetchStart = performance.now();
@@ -89,7 +85,6 @@ export default function Map({ setMapCenter, setTowerCount }) {
 
     const viewportController = createViewportController({
       fetchHeatmapPoints,
-      fetchClusters,
       fetchRawTowers,
       debounceMs: 300,
       onData: ({ mode, data }) => {
@@ -105,8 +100,8 @@ export default function Map({ setMapCenter, setTowerCount }) {
           return;
         }
 
-        if (mode === "cluster") {
-          renderState.clusterGeoJSON = clustersToGeoJSON(data);
+        if (mode === "density") {
+          renderState.densityGeoJSON = heatmapPointsToGeoJSON(data);
           renderMap({
             map,
             renderState,
@@ -162,7 +157,7 @@ export default function Map({ setMapCenter, setTowerCount }) {
       viewportController.destroy();
       map.off("load", handleMapLoad);
       map.off("moveend", handleMoveEnd);
-      removeGeoJSONLayerResources(map, CLUSTER_SOURCE_ID, CLUSTER_LAYER_ID);
+      removeGeoJSONLayerResources(map, DENSITY_SOURCE_ID, DENSITY_LAYER_ID);
       removeGeoJSONLayerResources(map, HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID);
       removeGeoJSONLayerResources(map, RAW_TOWER_SOURCE_ID, RAW_TOWER_LAYER_ID);
     };
