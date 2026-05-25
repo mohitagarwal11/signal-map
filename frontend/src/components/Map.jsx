@@ -17,7 +17,11 @@ import { hydrateInitialSnapshot } from "../map/bootstrap/hydrateInitialSnapshot"
 import { getViewport } from "../utils/getViewport";
 import { heatmapPointsToGeoJSON } from "../utils/heatmapPointsToGeoJSON";
 import { towersToGeoJSON } from "../utils/towersToGeoJSON";
-import { getTowersData, getHeatmapPoints } from "../api/towers.api";
+import {
+  getTowerCount,
+  getTowersData,
+  getHeatmapPoints,
+} from "../api/towers.api";
 import { createViewportController } from "../services/viewport/viewportController";
 
 import { devLog } from "../utils/devLog";
@@ -44,26 +48,45 @@ export default function Map({ setMapCenter, setTowerCount }) {
       return response.data;
     };
 
-    const fetchTowers = async ({ bounds, signal }) => {
+    const fetchTowers = async ({ bounds, zoom, towerLimit, signal }) => {
       const fetchStart = performance.now();
-      const response = await getTowersData(bounds, MAX_RAW_TOWERS, 0, {
+      const requestedLimit = Number.isFinite(towerLimit)
+        ? towerLimit
+        : MAX_RAW_TOWERS;
+      const response = await getTowersData(bounds, requestedLimit, 0, {
         signal,
       });
       const fetchDuration = performance.now() - fetchStart;
       const towers = Array.isArray(response.data.data)
         ? response.data.data
         : [];
-      const cappedTowers = towers.slice(0, MAX_RAW_TOWERS);
+      const cappedTowers = towers.slice(0, requestedLimit);
 
       devLog("PERF raw_fetch", {
         durationMs: Number(fetchDuration.toFixed(2)),
         returnedCount: towers.length,
         renderedCount: cappedTowers.length,
+        zoom,
+        requestedLimit,
       });
 
-      setTowerCount(towers.length);
-
       return cappedTowers;
+    };
+
+    const fetchViewportTowerCount = async (bounds) => {
+      const fetchStart = performance.now();
+      const response = await getTowerCount(bounds);
+      const fetchDuration = performance.now() - fetchStart;
+      const count = Number(response.data?.count ?? 0);
+
+      devLog("PERF tower_count_fetch", {
+        durationMs: Number(fetchDuration.toFixed(2)),
+        count,
+      });
+
+      setTowerCount(count);
+
+      return count;
     };
 
     const map = new mapplsClient.Map("map", INITIAL_MAP_CONFIG);
@@ -110,13 +133,35 @@ export default function Map({ setMapCenter, setTowerCount }) {
         map,
         renderState,
       });
+
+      requestViewportData();
     };
 
-    const requestViewportData = () => {
+    const requestViewportData = async () => {
+      const bounds = getViewport(map);
+      const zoom = map.getZoom();
+      const isMaxZoomTowerView = zoom >= 15;
+      let towerLimit = MAX_RAW_TOWERS;
+
+      if (isMaxZoomTowerView) {
+        try {
+          towerLimit = await fetchViewportTowerCount(bounds);
+        } catch (error) {
+          devLog("Error fetching max-zoom tower count:", error);
+        }
+      }
+
       viewportController.handleViewportChange({
-        bounds: getViewport(map),
-        zoom: map.getZoom(),
+        bounds,
+        zoom,
+        towerLimit,
       });
+
+      if (!isMaxZoomTowerView) {
+        fetchViewportTowerCount(bounds).catch((error) => {
+          devLog("Error fetching tower count:", error);
+        });
+      }
     };
 
     const handleMoveEnd = () => {

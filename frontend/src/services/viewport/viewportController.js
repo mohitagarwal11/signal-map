@@ -76,23 +76,37 @@ export function createViewportController(config) {
     }
   }
 
-  function createCacheKey(mode, viewportKey) {
+  function createCacheKey(mode, viewportKey, towerLimit) {
+    if (mode === "towers" && typeof towerLimit === "number") {
+      return `${mode}:${viewportKey}:${towerLimit}`;
+    }
+
     return `${mode}:${viewportKey}`;
   }
 
-  function getFetchDescriptor({ bounds, zoom, mode = getFetchMode(zoom) }) {
-    const fetchBounds = createFetchBounds(bounds, mode);
+  function getFetchDescriptor({
+    bounds,
+    zoom,
+    mode = getFetchMode(zoom),
+    towerLimit,
+  }) {
+    const fetchBounds = createFetchBounds(bounds, mode, zoom);
     const viewportKey = createViewportKey(fetchBounds);
-    const cacheKey = createCacheKey(mode, viewportKey);
+    const cacheKey = createCacheKey(mode, viewportKey, towerLimit);
 
     return {
       bounds: fetchBounds,
       mode,
       cacheKey,
+      towerLimit,
     };
   }
 
-  function createFetchBounds(bounds, mode) {
+  function createFetchBounds(bounds, mode, zoom) {
+    if (mode === "towers" && typeof zoom === "number" && zoom >= 15) {
+      return bounds;
+    }
+
     const bufferedBounds = expandViewport(
       bounds,
       VIEWPORT_EXPANSION_FACTOR[mode],
@@ -104,7 +118,7 @@ export function createViewportController(config) {
     return quantizedBounds;
   }
 
-  async function executeRequest({ bounds, zoom, mode, cacheKey }) {
+  async function executeRequest({ bounds, zoom, mode, cacheKey, towerLimit }) {
     const fetchViewportData = fetchByMode[mode];
 
     if (!fetchViewportData) {
@@ -171,6 +185,7 @@ export function createViewportController(config) {
     const requestPromise = fetchViewportData({
       bounds,
       zoom,
+      towerLimit,
       signal: controller.signal,
     })
       .then((data) => {
@@ -205,11 +220,11 @@ export function createViewportController(config) {
     }
   }
 
-  function handleViewportChange({ bounds, zoom }) {
+  function handleViewportChange({ bounds, zoom, towerLimit }) {
     clearDebounce();
 
     debounceTimer = window.setTimeout(() => {
-      const descriptor = getFetchDescriptor({ bounds, zoom });
+      const descriptor = getFetchDescriptor({ bounds, zoom, towerLimit });
 
       executeRequest({ ...descriptor, zoom }).catch((error) => {
         devLog("Error fetching viewport data:", error);
