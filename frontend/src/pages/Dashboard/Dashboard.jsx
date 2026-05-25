@@ -126,10 +126,20 @@ export default function Dashboard() {
   const [selectedOperator, setSelectedOperator] = useState("All Operators");
 
   const [techDropdown, setTechDropdown] = useState(false);
-  const [selectedNetwork, setSelectedNetwork] = useState("All Networks");
+  const [selectedNetwork, setSelectedNetwork] = useState("all");
 
   const operators = ["All Operators", "Airtel", "Jio", "Vi"];
-  const networks = ["All Networks", "5G", "4G", "LTE"];
+  const networkOptions = [
+    { value: "all", label: "All Networks" },
+    { value: "2G", label: "2G - GSM, CDMA" },
+    { value: "3G", label: "3G - UMTS, CDMA" },
+    { value: "4G", label: "4G - LTE" },
+    { value: "5G", label: "5G - NR" },
+  ];
+
+  const selectedNetworkLabel =
+    networkOptions.find((network) => network.value === selectedNetwork)
+      ?.label ?? "All Networks";
 
   return (
     <div className="dashboard">
@@ -198,23 +208,23 @@ export default function Dashboard() {
                 className="dash-dropdown-btn"
                 onClick={() => setTechDropdown((v) => !v)}
               >
-                {selectedNetwork}
+                {selectedNetworkLabel}
                 <ChevronDownIcon />
               </button>
               {techDropdown && (
                 <div className="dash-dropdown-menu">
-                  {networks.map((network) => (
+                  {networkOptions.map((network) => (
                     <div
-                      key={network}
+                      key={network.value}
                       className={`dash-dropdown-item ${
-                        selectedNetwork === network ? "active" : ""
+                        selectedNetwork === network.value ? "active" : ""
                       }`}
                       onClick={() => {
-                        setSelectedNetwork(network);
+                        setSelectedNetwork(network.value);
                         setTechDropdown(false);
                       }}
                     >
-                      {network}
+                      {network.label}
                     </div>
                   ))}
                 </div>
@@ -223,7 +233,11 @@ export default function Dashboard() {
           </div>
 
           {/* map */}
-          <Map setMapCenter={setMapCenter} setTowerCount={setTowerCount} />
+          <Map
+            setMapCenter={setMapCenter}
+            setTowerCount={setTowerCount}
+            selectedNetwork={selectedNetwork}
+          />
 
           {/* status bar */}
           <div className="dash-statusbar">

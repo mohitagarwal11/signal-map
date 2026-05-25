@@ -1,7 +1,15 @@
 import { heatmapPointsToGeoJSON } from "../../utils/heatmapPointsToGeoJSON";
 import { INITIAL_HEATMAP_SNAPSHOT } from "../../constants/initialHeatmap";
 
-export function hydrateInitialSnapshot({ renderState, viewportController }) {
+export function hydrateInitialSnapshot({
+  renderState,
+  viewportController,
+  network = "all",
+}) {
+  if (network !== "all") {
+    return;
+  }
+
   renderState.fetchMode = "heatmap";
 
   renderState.heatmapGeoJSON = heatmapPointsToGeoJSON(
@@ -15,5 +23,6 @@ export function hydrateInitialSnapshot({ renderState, viewportController }) {
     zoom: INITIAL_HEATMAP_SNAPSHOT.zoom,
     mode: "heatmap",
     data: INITIAL_HEATMAP_SNAPSHOT.points,
+    network,
   });
 }

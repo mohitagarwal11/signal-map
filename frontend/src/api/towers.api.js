@@ -13,6 +13,7 @@ export const getTowersData = async (bounds, limit, offset, options = {}) => {
         max_lon: bounds.max_lon,
         limit,
         offset,
+        network: options.network ?? "all",
       },
     });
     return response;
@@ -31,6 +32,7 @@ export const getTowerCount = async (bounds, options = {}) => {
         max_lat: bounds.max_lat,
         min_lon: bounds.min_lon,
         max_lon: bounds.max_lon,
+        network: options.network ?? "all",
       },
     });
     return response;
@@ -40,16 +42,17 @@ export const getTowerCount = async (bounds, options = {}) => {
   }
 };
 
-export const getHeatmapPoints = async (bounds, zoom, signal) => {
+export const getHeatmapPoints = async (bounds, zoom, options = {}) => {
   try {
     const response = await axios.get(`${BACKEND_URL}/towers/heatmap`, {
-      signal,
+      signal: options.signal,
       params: {
         min_lat: bounds.min_lat,
         max_lat: bounds.max_lat,
         min_lon: bounds.min_lon,
         max_lon: bounds.max_lon,
         zoom,
+        network: options.network ?? "all",
       },
     });
 

@@ -32,8 +32,8 @@ function isAbortError(error) {
   );
 }
 
-function shouldUseInitialHeatmapSnapshot(mode, zoom) {
-  if (mode !== "heatmap" || typeof zoom !== "number") {
+function shouldUseInitialHeatmapSnapshot(mode, zoom, network) {
+  if (mode !== "heatmap" || typeof zoom !== "number" || network !== "all") {
     return false;
   }
 
@@ -76,12 +76,12 @@ export function createViewportController(config) {
     }
   }
 
-  function createCacheKey(mode, viewportKey, towerLimit) {
+  function createCacheKey(mode, viewportKey, towerLimit, network = "all") {
     if (mode === "towers" && typeof towerLimit === "number") {
-      return `${mode}:${viewportKey}:${towerLimit}`;
+      return `${mode}:${network}:${viewportKey}:${towerLimit}`;
     }
 
-    return `${mode}:${viewportKey}`;
+    return `${mode}:${network}:${viewportKey}`;
   }
 
   function getFetchDescriptor({
@@ -89,16 +89,18 @@ export function createViewportController(config) {
     zoom,
     mode = getFetchMode(zoom),
     towerLimit,
+    network = "all",
   }) {
     const fetchBounds = createFetchBounds(bounds, mode, zoom);
     const viewportKey = createViewportKey(fetchBounds);
-    const cacheKey = createCacheKey(mode, viewportKey, towerLimit);
+    const cacheKey = createCacheKey(mode, viewportKey, towerLimit, network);
 
     return {
       bounds: fetchBounds,
       mode,
       cacheKey,
       towerLimit,
+      network,
     };
   }
 
@@ -118,14 +120,21 @@ export function createViewportController(config) {
     return quantizedBounds;
   }
 
-  async function executeRequest({ bounds, zoom, mode, cacheKey, towerLimit }) {
+  async function executeRequest({
+    bounds,
+    zoom,
+    mode,
+    cacheKey,
+    towerLimit,
+    network,
+  }) {
     const fetchViewportData = fetchByMode[mode];
 
     if (!fetchViewportData) {
       return;
     }
 
-    if (shouldUseInitialHeatmapSnapshot(mode, zoom)) {
+    if (shouldUseInitialHeatmapSnapshot(mode, zoom, network)) {
       requestId += 1;
       cancelActiveRequest();
       onData({
@@ -186,6 +195,7 @@ export function createViewportController(config) {
       bounds,
       zoom,
       towerLimit,
+      network,
       signal: controller.signal,
     })
       .then((data) => {
@@ -220,11 +230,16 @@ export function createViewportController(config) {
     }
   }
 
-  function handleViewportChange({ bounds, zoom, towerLimit }) {
+  function handleViewportChange({ bounds, zoom, towerLimit, network = "all" }) {
     clearDebounce();
 
     debounceTimer = window.setTimeout(() => {
-      const descriptor = getFetchDescriptor({ bounds, zoom, towerLimit });
+      const descriptor = getFetchDescriptor({
+        bounds,
+        zoom,
+        towerLimit,
+        network,
+      });
 
       executeRequest({ ...descriptor, zoom }).catch((error) => {
         devLog("Error fetching viewport data:", error);
@@ -232,8 +247,8 @@ export function createViewportController(config) {
     }, debounceMs);
   }
 
-  function hydrateViewport({ bounds, zoom, mode, data }) {
-    const { cacheKey } = getFetchDescriptor({ bounds, zoom, mode });
+  function hydrateViewport({ bounds, zoom, mode, data, network = "all" }) {
+    const { cacheKey } = getFetchDescriptor({ bounds, zoom, mode, network });
     viewportCache.set(cacheKey, data);
     devLog("CACHE HYDRATED", cacheKey);
   }

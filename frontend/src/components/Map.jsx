@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { INITIAL_MAP_CONFIG } from "../map/config/mapConfig";
 import {
   HEATMAP_SOURCE_ID,
@@ -26,7 +26,19 @@ import { createViewportController } from "../services/viewport/viewportControlle
 
 import { devLog } from "../utils/devLog";
 
-export default function Map({ setMapCenter, setTowerCount }) {
+export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
+  const selectedNetworkRef = useRef(selectedNetwork);
+  const mapRef = useRef(null);
+  const requestViewportDataRef = useRef(null);
+
+  useEffect(() => {
+    selectedNetworkRef.current = selectedNetwork;
+
+    if (requestViewportDataRef.current) {
+      requestViewportDataRef.current();
+    }
+  }, [selectedNetwork]);
+
   useEffect(() => {
     const mapplsClient = window.mappls;
 
@@ -34,27 +46,38 @@ export default function Map({ setMapCenter, setTowerCount }) {
 
     const renderState = createRenderState();
 
-    const fetchHeatmapPoints = async ({ bounds, zoom, signal }) => {
+    const fetchHeatmapPoints = async ({ bounds, zoom, signal, network }) => {
       const fetchStart = performance.now();
-      const response = await getHeatmapPoints(bounds, zoom, signal);
+      const response = await getHeatmapPoints(bounds, zoom, {
+        signal,
+        network,
+      });
       const fetchDuration = performance.now() - fetchStart;
 
       devLog("PERF heatmap_fetch", {
         durationMs: Number(fetchDuration.toFixed(2)),
         pointCount: response.data.length,
         zoom,
+        network,
       });
 
       return response.data;
     };
 
-    const fetchTowers = async ({ bounds, zoom, towerLimit, signal }) => {
+    const fetchTowers = async ({
+      bounds,
+      zoom,
+      towerLimit,
+      signal,
+      network,
+    }) => {
       const fetchStart = performance.now();
       const requestedLimit = Number.isFinite(towerLimit)
         ? towerLimit
         : MAX_RAW_TOWERS;
       const response = await getTowersData(bounds, requestedLimit, 0, {
         signal,
+        network,
       });
       const fetchDuration = performance.now() - fetchStart;
       const towers = Array.isArray(response.data.data)
@@ -68,20 +91,22 @@ export default function Map({ setMapCenter, setTowerCount }) {
         renderedCount: cappedTowers.length,
         zoom,
         requestedLimit,
+        network,
       });
 
       return cappedTowers;
     };
 
-    const fetchViewportTowerCount = async (bounds) => {
+    const fetchViewportTowerCount = async (bounds, network) => {
       const fetchStart = performance.now();
-      const response = await getTowerCount(bounds);
+      const response = await getTowerCount(bounds, { network });
       const fetchDuration = performance.now() - fetchStart;
       const count = Number(response.data?.count ?? 0);
 
       devLog("PERF tower_count_fetch", {
         durationMs: Number(fetchDuration.toFixed(2)),
         count,
+        network,
       });
 
       setTowerCount(count);
@@ -90,6 +115,7 @@ export default function Map({ setMapCenter, setTowerCount }) {
     };
 
     const map = new mapplsClient.Map("map", INITIAL_MAP_CONFIG);
+    mapRef.current = map;
 
     const viewportController = createViewportController({
       fetchHeatmapPoints,
@@ -123,29 +149,22 @@ export default function Map({ setMapCenter, setTowerCount }) {
       },
     });
 
-    const handleMapLoad = () => {
-      renderState.mapReady = true;
-      hydrateInitialSnapshot({
-        renderState,
-        viewportController,
-      });
-      renderMap({
-        map,
-        renderState,
-      });
-
-      requestViewportData();
-    };
-
     const requestViewportData = async () => {
-      const bounds = getViewport(map);
-      const zoom = map.getZoom();
+      const currentMap = mapRef.current;
+
+      if (!currentMap) {
+        return;
+      }
+
+      const bounds = getViewport(currentMap);
+      const zoom = currentMap.getZoom();
+      const network = selectedNetworkRef.current;
       const isMaxZoomTowerView = zoom >= 15;
       let towerLimit = MAX_RAW_TOWERS;
 
       if (isMaxZoomTowerView) {
         try {
-          towerLimit = await fetchViewportTowerCount(bounds);
+          towerLimit = await fetchViewportTowerCount(bounds, network);
         } catch (error) {
           devLog("Error fetching max-zoom tower count:", error);
         }
@@ -155,13 +174,31 @@ export default function Map({ setMapCenter, setTowerCount }) {
         bounds,
         zoom,
         towerLimit,
+        network,
       });
 
       if (!isMaxZoomTowerView) {
-        fetchViewportTowerCount(bounds).catch((error) => {
+        fetchViewportTowerCount(bounds, network).catch((error) => {
           devLog("Error fetching tower count:", error);
         });
       }
+    };
+
+    requestViewportDataRef.current = requestViewportData;
+
+    const handleMapLoad = () => {
+      renderState.mapReady = true;
+      hydrateInitialSnapshot({
+        renderState,
+        viewportController,
+        network: selectedNetworkRef.current,
+      });
+      renderMap({
+        map,
+        renderState,
+      });
+
+      requestViewportData();
     };
 
     const handleMoveEnd = () => {
@@ -180,6 +217,8 @@ export default function Map({ setMapCenter, setTowerCount }) {
 
     return () => {
       viewportController.destroy();
+      requestViewportDataRef.current = null;
+      mapRef.current = null;
       map.off("load", handleMapLoad);
       map.off("moveend", handleMoveEnd);
       removeGeoJSONLayerResources(map, HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID);
