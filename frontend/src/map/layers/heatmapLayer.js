@@ -5,7 +5,7 @@ export const HEATMAP_LAYER = {
   type: "heatmap",
   source: HEATMAP_SOURCE_ID,
   minzoom: 4,
-  maxzoom: 7,
+  maxzoom: 15,
   paint: {
     "heatmap-weight": 1,
 
@@ -16,12 +16,32 @@ export const HEATMAP_LAYER = {
       4,
       3,
       5,
-      2,
+      2.4,
       6,
+      1.8,
+      8,
+      1.25,
+      10,
+      1.0,
+      12,
       1,
     ],
 
-    "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 14],
+    "heatmap-radius": [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      4,
+      22,
+      6,
+      18,
+      8,
+      15,
+      10,
+      12,
+      12,
+      10,
+    ],
 
     "heatmap-opacity": [
       "interpolate",

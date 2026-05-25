@@ -105,7 +105,7 @@ const DEFAULT_PANEL = {
   towerCount: "12 Active",
   availability5g: "85%",
   avgDistance: "420m",
-  hexDensity: "0.8",
+  heatmapScore: "0.8",
   benchmarks: [
     { carrier: "Airtel", score: "92%", lat: "12ms" },
     { carrier: "Jio", score: "88%", lat: "15ms" },
@@ -292,7 +292,7 @@ export default function Dashboard() {
             <Card header="Tower Count" value={towerCount} />
             <Card header="5G Avaibility" value={panelData.availability5g} />
             <Card header="Avg. Speed" value={panelData.avgDistance} />
-            <Card header="HEX Density" value={panelData.hexDensity} />
+            <Card header="Heatmap Score" value={panelData.heatmapScore} />
           </div>
 
           {/* network benchmark */}

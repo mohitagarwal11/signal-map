@@ -3,19 +3,25 @@ import { createViewportKey } from "./viewportKey";
 import { createViewportCache } from "./viewportCache";
 import { expandViewport } from "../../utils/expandViewport";
 import { quantizeViewport } from "../../utils/quantizeViewport";
+import { INITIAL_HEATMAP_SNAPSHOT } from "../../constants/initialHeatmap";
 
 import { devLog } from "../../utils/devLog";
 
 const DEFAULT_DEBOUNCE_MS = 300;
 
 const VIEWPORT_EXPANSION_FACTOR = {
-  density: 0.3,
-  raw: 0.15,
+  heatmap: 0.3,
+  towers: 0.15,
 };
 
 const VIEWPORT_QUANTIZATION_STEP = {
-  density: 0.1,
-  raw: 0.02,
+  heatmap: 0.1,
+  towers: 0.02,
+};
+
+const INITIAL_SNAPSHOT_ZOOM_WINDOW = {
+  min: 3.5,
+  max: 4.5,
 };
 
 function isAbortError(error) {
@@ -26,10 +32,21 @@ function isAbortError(error) {
   );
 }
 
+function shouldUseInitialHeatmapSnapshot(mode, zoom) {
+  if (mode !== "heatmap" || typeof zoom !== "number") {
+    return false;
+  }
+
+  return (
+    zoom >= INITIAL_SNAPSHOT_ZOOM_WINDOW.min &&
+    zoom < INITIAL_SNAPSHOT_ZOOM_WINDOW.max
+  );
+}
+
 export function createViewportController(config) {
   const {
-    fetchDensityPoints,
-    fetchRawTowers,
+    fetchHeatmapPoints,
+    fetchTowers,
     onData,
     debounceMs = DEFAULT_DEBOUNCE_MS,
   } = config;
@@ -41,8 +58,8 @@ export function createViewportController(config) {
   const inFlightRequests = new Map();
 
   const fetchByMode = {
-    density: fetchDensityPoints,
-    raw: fetchRawTowers,
+    heatmap: fetchHeatmapPoints,
+    towers: fetchTowers,
   };
 
   function clearDebounce() {
@@ -91,6 +108,16 @@ export function createViewportController(config) {
     const fetchViewportData = fetchByMode[mode];
 
     if (!fetchViewportData) {
+      return;
+    }
+
+    if (shouldUseInitialHeatmapSnapshot(mode, zoom)) {
+      requestId += 1;
+      cancelActiveRequest();
+      onData({
+        mode,
+        data: INITIAL_HEATMAP_SNAPSHOT.points,
+      });
       return;
     }
 

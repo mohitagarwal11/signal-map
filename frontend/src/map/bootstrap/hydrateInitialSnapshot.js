@@ -2,16 +2,18 @@ import { heatmapPointsToGeoJSON } from "../../utils/heatmapPointsToGeoJSON";
 import { INITIAL_HEATMAP_SNAPSHOT } from "../../constants/initialHeatmap";
 
 export function hydrateInitialSnapshot({ renderState, viewportController }) {
-  renderState.fetchMode = "density";
+  renderState.fetchMode = "heatmap";
 
-  renderState.densityGeoJSON = heatmapPointsToGeoJSON(INITIAL_HEATMAP_SNAPSHOT.points);
+  renderState.heatmapGeoJSON = heatmapPointsToGeoJSON(
+    INITIAL_HEATMAP_SNAPSHOT.points,
+  );
 
-  renderState.densityAvailable = true;
+  renderState.heatmapAvailable = true;
 
   viewportController.hydrateViewport({
     bounds: INITIAL_HEATMAP_SNAPSHOT.bounds,
     zoom: INITIAL_HEATMAP_SNAPSHOT.zoom,
-    mode: "density",
+    mode: "heatmap",
     data: INITIAL_HEATMAP_SNAPSHOT.points,
   });
 }

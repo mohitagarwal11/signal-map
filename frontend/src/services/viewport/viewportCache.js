@@ -1,8 +1,8 @@
-const MAX_CACHE_ENTRIES = 100;
+const MAX_CACHE_ENTRIES = 24;
 
 const CACHE_TTL_MS = {
-  density: 60_000,
-  raw: 20_000,
+  heatmap: 15_000,
+  towers: 10_000,
 };
 
 function getModeFromKey(key) {

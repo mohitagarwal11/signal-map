@@ -7,6 +7,6 @@ export function getRawTowerLayerConfig(map) {
     sourceId: RAW_TOWER_SOURCE_ID,
     layerId: RAW_TOWER_LAYER_ID,
     layer: RAW_TOWER_LAYER,
-    logLabel: "raw",
+    logLabel: "towers",
   };
 }

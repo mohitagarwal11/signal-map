@@ -13,7 +13,7 @@ export function logHeatmapLayerStatus({ map, renderState }) {
 
     layerPresent: Boolean(heatmapLayer),
 
-    featureCount: renderState.densityGeoJSON.features.length,
+    featureCount: renderState.heatmapGeoJSON.features.length,
 
     layerType: heatmapLayer?.type ?? "none",
 

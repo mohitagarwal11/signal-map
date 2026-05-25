@@ -1,11 +1,9 @@
 export function getFetchMode(zoom) {
-  // Simplified fetch model: only `density` (aggregated) and `raw` (points).
-  // Low and mid zooms fetch the density dataset; high zoom fetches raw towers.
-  if (typeof zoom !== "number") return "density";
+  if (typeof zoom !== "number") return "heatmap";
 
-  if (zoom < 11) {
-    return "density";
+  if (zoom < 12) {
+    return "heatmap";
   }
 
-  return "raw";
+  return "towers";
 }

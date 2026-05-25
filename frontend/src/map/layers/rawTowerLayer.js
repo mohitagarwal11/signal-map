@@ -7,7 +7,7 @@ export const RAW_TOWER_LAYER = {
   id: RAW_TOWER_LAYER_ID,
   type: "circle",
   source: RAW_TOWER_SOURCE_ID,
-  minzoom: 9,
+  minzoom: 12,
   paint: {
     "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 3, 12, 3, 15, 4],
     "circle-color": "#ff5a5a",

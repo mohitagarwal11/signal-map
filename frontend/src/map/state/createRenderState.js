@@ -4,17 +4,16 @@ export function createRenderState() {
   const state = {
     mapReady: false,
     layersInitialized: false,
-    fetchMode: "density",
-    densityAvailable: false,
-    rawAvailable: false,
+    fetchMode: "heatmap",
+    heatmapAvailable: false,
+    towersAvailable: false,
 
-    densityGeoJSON: EMPTY_GEOJSON,
-    rawGeoJSON: EMPTY_GEOJSON,
+    heatmapGeoJSON: EMPTY_GEOJSON,
+    towersGeoJSON: EMPTY_GEOJSON,
 
     rendererWeights: {
-      density: 0,
       heatmap: 0,
-      raw: 0,
+      towers: 0,
     },
     rendererPolicy: {},
   };
