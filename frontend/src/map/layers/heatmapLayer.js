@@ -21,8 +21,7 @@ export const HEATMAP_LAYER = {
       1,
     ],
 
-    "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 18],
-
+    "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 14],
 
     "heatmap-opacity": [
       "interpolate",
@@ -42,7 +41,6 @@ export const HEATMAP_LAYER = {
       "interpolate",
       ["linear"],
       ["heatmap-density"],
-
       0.0,
       "rgba(0,0,0,0)",
       0.08,

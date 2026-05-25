@@ -1,12 +1,20 @@
-import { runRenderer } from "../engine/rendererEngine";
+// import { runRenderer } from "../engine/rendererEngine";
+import { initializeLayers } from "../layers/initializeLayers";
+import { applyGeoJSONSources } from "./applyGeoJSONSources";
+import { applyVisibility } from "./applyVisibility";
+import { logHeatmapLayerStatus } from "../debug/logHeatmapLayerStatus";
 
 export function renderMap({ map, renderState }) {
   if (!map || !renderState.mapReady) {
     return;
   }
-  // Delegate to renderer engine which centralizes layer/source/visibility
-  // responsibilities. This makes the map wiring simpler and prepares a
-  // clean insertion point for a future field renderer or custom WebGL
-  // implementation.
-  runRenderer({ map, renderState });
+  initializeLayers({ map, renderState });
+
+  applyGeoJSONSources({ map, renderState });
+
+  applyVisibility({ map, renderState });
+
+  logHeatmapLayerStatus({ map, renderState });
+
+  return true;
 }

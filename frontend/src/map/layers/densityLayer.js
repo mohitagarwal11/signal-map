@@ -7,29 +7,24 @@ export const DENSITY_LAYER = {
   minzoom: 5,
   maxzoom: 13,
   paint: {
-    // Phase 11 — mass-oriented density styling
-    // Strategy: make individual points almost invisible, increase radii
-    // dramatically, use high blur at mid/low zooms and very low per-point
-    // opacity so overlaps accumulate into perceptual masses.
     "circle-radius": [
       "interpolate",
       ["linear"],
       ["zoom"],
-      // At low zooms we create wide, soft blobs even for small counts.
-      4,
-      [
-        "interpolate",
-        ["linear"],
-        ["get", "tower_count"],
-        1,
-        6,
-        10,
-        18,
-        100,
-        36,
-        1000,
-        72,
-      ],
+      // 4,
+      // [
+      //   "interpolate",
+      //   ["linear"],
+      //   ["get", "tower_count"],
+      //   1,
+      //   6,
+      //   10,
+      //   18,
+      //   100,
+      //   36,
+      //   1000,
+      //   72,
+      // ],
       // Mid zoom: stronger massing, large radii for clusters
       7,
       [
