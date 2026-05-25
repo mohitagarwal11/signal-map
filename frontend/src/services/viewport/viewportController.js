@@ -1,4 +1,4 @@
-import { getFetchMode } from "./fetchMode";
+import { getFetchMode } from "./getFetchMode";
 import { createViewportKey } from "./viewportKey";
 import { createViewportCache } from "./viewportCache";
 import { expandViewport } from "../../utils/expandViewport";
@@ -9,11 +9,13 @@ import { devLog } from "../../utils/devLog";
 const DEFAULT_DEBOUNCE_MS = 300;
 
 const VIEWPORT_EXPANSION_FACTOR = {
+  heatmap: 0.4,
   cluster: 0.3,
   raw: 0.15,
 };
 
 const VIEWPORT_QUANTIZATION_STEP = {
+  heatmap: 0.25,
   cluster: 0.1,
   raw: 0.02,
 };
@@ -28,6 +30,7 @@ function isAbortError(error) {
 
 export function createViewportController(config) {
   const {
+    fetchHeatmapPoints,
     fetchClusters,
     fetchRawTowers,
     onData,
@@ -41,6 +44,7 @@ export function createViewportController(config) {
   const inFlightRequests = new Map();
 
   const fetchByMode = {
+    heatmap: fetchHeatmapPoints,
     cluster: fetchClusters,
     raw: fetchRawTowers,
   };

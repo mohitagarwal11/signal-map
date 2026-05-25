@@ -1,5 +1,4 @@
-import { ensureGeoJSONLayer } from "./ensureGeoJSONLayer";
-import { ensureHeatmapLayer } from "./ensureHeatmapLayer";
+import { ensureSourceLayer } from "./ensureSourceLayer";
 import { getClusterLayerConfig } from "./getClusterLayerConfig";
 import { getHeatmapLayerConfig } from "./getHeatmapLayerConfig";
 import { getRawTowerLayerConfig } from "./getRawTowerLayerConfig";
@@ -9,36 +8,27 @@ export function initializeLayers({ map, renderState }) {
     return false;
   }
 
-  const clusterReady = ensureGeoJSONLayer({
-    ...getClusterLayerConfig(map),
-
-    data: renderState.clusterGeoJSON,
+  const heatmapReady = ensureSourceLayer({
+    ...getHeatmapLayerConfig(map),
+    data: renderState.heatmapGeoJSON,
   });
 
-  const rawReady = ensureGeoJSONLayer({
-    ...getRawTowerLayerConfig(map),
+  const clusterReady = ensureSourceLayer({
+    ...getClusterLayerConfig(map),
+    data: renderState.clusterGeoJSON,
+    sourceOptions: {
+      cluster: true,
+      clusterRadius: 50,
+      clusterMaxZoom: 10,
+    },
+  });
 
+  const rawReady = ensureSourceLayer({
+    ...getRawTowerLayerConfig(map),
     data: renderState.rawGeoJSON,
   });
 
-  let heatmapReady = true;
-
-  if (renderState.heatmapAvailable) {
-    heatmapReady = ensureHeatmapLayer({
-      ...getHeatmapLayerConfig(map),
-
-      data: renderState.clusterGeoJSON,
-    });
-
-    if (heatmapReady === false) {
-      renderState.heatmapAvailable = false;
-    }
-  }
-
-  renderState.layersInitialized =
-    clusterReady &&
-    rawReady &&
-    (!renderState.heatmapAvailable || heatmapReady === true);
+  renderState.layersInitialized = clusterReady && rawReady && heatmapReady;
 
   return renderState.layersInitialized;
 }

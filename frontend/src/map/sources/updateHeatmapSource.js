@@ -1,14 +1,12 @@
 import { HEATMAP_SOURCE_ID } from "../constants/layerIds";
-import { getMapSource } from "./getMapSource";
 
-export function updateHeatmapSource({ map, geoJSON }) {
-  const source = getMapSource(map, HEATMAP_SOURCE_ID);
+export function updateHeatmapSource(map, data) {
+  if (!map) return;
 
-  if (!source) {
-    return;
-  }
+  const source = map.getSource(HEATMAP_SOURCE_ID);
 
-  if (typeof source.setData === "function") {
-    source.setData(geoJSON);
-  }
+  if (!source) return;
+
+  source.setData(data);
 }
+

@@ -1,20 +1,11 @@
-import { HEATMAP_SOURCE_ID } from "../constants/layerIds";
-import { getClusterLayerConfig } from "../layers/getClusterLayerConfig";
-import { getRawTowerLayerConfig } from "../layers/getRawTowerLayerConfig";
-import { getMapSource } from "../sources/getMapSource";
-import { updateGeoJSONSource } from "../sources/updateGeoJSONSource";
 import { updateHeatmapSource } from "../sources/updateHeatmapSource";
+import { updateClusterSource } from "../sources/updateClusterSource";
+import { updateRawSource } from "../sources/updateRawSource";
 
 export function applyGeoJSONSources({ map, renderState }) {
-  updateGeoJSONSource(getClusterLayerConfig(map), renderState.clusterGeoJSON);
-  updateGeoJSONSource(getRawTowerLayerConfig(map), renderState.rawGeoJSON);
+  updateHeatmapSource(map, renderState.heatmapGeoJSON);
 
-  const heatmapSourcePresent = Boolean(getMapSource(map, HEATMAP_SOURCE_ID));
+  updateClusterSource(map, renderState.clusterGeoJSON);
 
-  if (renderState.heatmapAvailable || heatmapSourcePresent) {
-    updateHeatmapSource({
-      map,
-      geoJSON: renderState.clusterGeoJSON,
-    });
-  }
+  updateRawSource(map, renderState.rawGeoJSON);
 }

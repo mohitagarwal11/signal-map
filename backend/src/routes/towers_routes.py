@@ -6,6 +6,7 @@ from controllers.towers_controller import (
     get_tower_clusters,
     get_tower_count,
     get_towers,
+    get_heatmap_points,
 )
 
 router = APIRouter()
@@ -39,14 +40,20 @@ def get_tower_clusters_route(
     max_lon: float,
     zoom: float,
 ):
-    response_start = time.perf_counter()
+    # response_start = time.perf_counter()
     clusters = get_tower_clusters(min_lat, max_lat, min_lon, max_lon, zoom)
-    duration_ms = (time.perf_counter() - response_start) * 1000
+    # duration_ms = (time.perf_counter() - response_start) * 1000
 
-    logger.info(
-        "PERF clusters_endpoint duration_ms=%.2f cluster_count=%s zoom=%s",
-        duration_ms,
-        len(clusters),
-        zoom,
-    )
+    # logger.info(
+    #     "PERF clusters_endpoint duration_ms=%.2f cluster_count=%s zoom=%s",
+    #     duration_ms,
+    #     len(clusters),
+    #     zoom,
+    # )
     return clusters
+
+@router.get("/heatmap")
+def get_towers_heatmap_route(
+    min_lat: float, max_lat: float, min_lon: float, max_lon: float, zoom: float,
+):
+    return get_heatmap_points(min_lat, max_lat, min_lon, max_lon, zoom)

@@ -12,16 +12,22 @@ import { MAX_RAW_TOWERS } from "../map/constants/renderConstants";
 import { removeGeoJSONLayerResources } from "../map/sources/removeGeoJSONResources";
 import { createRenderState } from "../map/state/createRenderState";
 import { renderMap } from "../map/rendering/renderMap";
-import { hydrateInitialSnapshot } from "../map/bootstrap/hydrateInitialSnapshot";
+// import { hydrateInitialSnapshot } from "../map/bootstrap/hydrateInitialSnapshot";
 import { getViewport } from "../utils/getViewport";
 import { clustersToGeoJSON } from "../utils/clustersToGeoJSON";
 import { towersToGeoJSON } from "../utils/towersToGeoJSON";
 import { getTowerClusters, getTowersData } from "../api/towers.api";
 import { createViewportController } from "../services/viewport/viewportController";
+import { getHeatmapPoints } from "../api/towers.api";
+import { heatmapPointsToGeoJSON } from "../utils/heatmapPointsToGeoJSON";
 
 import { devLog } from "../utils/devLog";
 
-export default function Map({ setMapCenter }) {
+export default function Map({ setMapCenter, setTowerCount }) {
+  // const [densityData, setDensityData] = useState(null);
+  // const [clusterData, setClusterData] = useState(null);
+  // const [rawData, setRawData] = useState(null);
+
   useEffect(() => {
     const mapplsClient = window.mappls;
 
@@ -37,6 +43,20 @@ export default function Map({ setMapCenter }) {
       devLog("PERF cluster_fetch", {
         durationMs: Number(fetchDuration.toFixed(2)),
         clusterCount: response.data.length,
+        zoom,
+      });
+
+      return response.data;
+    };
+
+    const fetchHeatmapPoints = async ({ bounds, zoom, signal }) => {
+      const fetchStart = performance.now();
+      const response = await getHeatmapPoints(bounds, zoom, signal);
+      const fetchDuration = performance.now() - fetchStart;
+
+      devLog("PERF heatmap_fetch", {
+        durationMs: Number(fetchDuration.toFixed(2)),
+        pointCount: response.data.length,
         zoom,
       });
 
@@ -60,17 +80,30 @@ export default function Map({ setMapCenter }) {
         renderedCount: cappedTowers.length,
       });
 
+      setTowerCount(towers.length);
+
       return cappedTowers;
     };
 
     const map = new mapplsClient.Map("map", INITIAL_MAP_CONFIG);
 
     const viewportController = createViewportController({
+      fetchHeatmapPoints,
       fetchClusters,
       fetchRawTowers,
       debounceMs: 300,
       onData: ({ mode, data }) => {
         renderState.mode = mode;
+
+        if (mode === "heatmap") {
+          renderState.heatmapGeoJSON = heatmapPointsToGeoJSON(data);
+          renderState.heatmapAvailable = true;
+          renderMap({
+            map,
+            renderState,
+          });
+          return;
+        }
 
         if (mode === "cluster") {
           renderState.clusterGeoJSON = clustersToGeoJSON(data);
@@ -87,16 +120,17 @@ export default function Map({ setMapCenter }) {
             map,
             renderState,
           });
+          return;
         }
       },
     });
 
     const handleMapLoad = () => {
       renderState.mapReady = true;
-      hydrateInitialSnapshot({
-        renderState,
-        viewportController,
-      });
+      // hydrateInitialSnapshot({
+      //   renderState,
+      //   viewportController,
+      // });
       renderMap({
         map,
         renderState,
@@ -132,7 +166,7 @@ export default function Map({ setMapCenter }) {
       removeGeoJSONLayerResources(map, HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID);
       removeGeoJSONLayerResources(map, RAW_TOWER_SOURCE_ID, RAW_TOWER_LAYER_ID);
     };
-  }, [setMapCenter]);
+  }, [setMapCenter, setTowerCount]);
 
   return (
     <div

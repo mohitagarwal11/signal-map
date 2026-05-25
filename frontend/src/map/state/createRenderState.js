@@ -4,8 +4,11 @@ export function createRenderState() {
   return {
     mapReady: false,
     layersInitialized: false,
-    mode: "cluster",
-    heatmapAvailable: true,
+
+    mode: "heatmap",
+    heatmapAvailable: false,
+
+    heatmapGeoJSON: EMPTY_GEOJSON,
     clusterGeoJSON: EMPTY_GEOJSON,
     rawGeoJSON: EMPTY_GEOJSON,
   };

@@ -2,25 +2,13 @@ import { EMPTY_GEOJSON } from "../constants/renderConstants";
 import { getMapLayer } from "../sources/getMapLayer";
 import { getMapSource } from "../sources/getMapSource";
 
-export function addMapLayer(map, layer, fallbackLayer) {
-  try {
-    map.addLayer(layer);
-  } catch (error) {
-    if (!fallbackLayer) {
-      throw error;
-    }
-
-    map.addLayer(fallbackLayer);
-  }
-}
-
-export function ensureGeoJSONLayer({
+export function ensureSourceLayer({
   map,
   sourceId,
   layerId,
   layer,
-  fallbackLayer,
   data = EMPTY_GEOJSON,
+  sourceOptions = {},
 }) {
   if (!map) {
     return false;
@@ -31,11 +19,12 @@ export function ensureGeoJSONLayer({
       map.addSource(sourceId, {
         type: "geojson",
         data,
+        ...sourceOptions,
       });
     }
 
     if (!getMapLayer(map, layerId)) {
-      addMapLayer(map, layer, fallbackLayer);
+      map.addLayer(layer);
     }
   } catch (error) {
     console.log(error);

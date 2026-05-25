@@ -7,5 +7,6 @@ export function getHeatmapLayerConfig(map) {
     sourceId: HEATMAP_SOURCE_ID,
     layerId: HEATMAP_LAYER_ID,
     layer: HEATMAP_LAYER,
+    logLabel: "heatmap",
   };
 }
