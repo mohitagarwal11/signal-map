@@ -6,7 +6,7 @@ import time
 from db.db import engine
 from sqlalchemy import text
 
-HEATMAP_LIMIT = 8000
+HEATMAP_LIMIT = None
 CLUSTER_LIMIT = 3000
 DEFAULT_CLUSTER_ZOOM = 6.0
 
@@ -210,8 +210,8 @@ def get_tower_clusters(min_lat, max_lat, min_lon, max_lon, zoom):
                     AND ST_IsValid(location::geometry)
             )
             SELECT
-                AVG(latitude)::float AS latitude,
-                AVG(longitude)::float AS longitude,
+                ST_Y(snapped_location)::float AS latitude,
+                ST_X(snapped_location)::float AS longitude,
                 COUNT(*)::int AS tower_count
             FROM filtered_towers
             GROUP BY snapped_location

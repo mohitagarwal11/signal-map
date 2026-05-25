@@ -16,11 +16,6 @@ export function initializeLayers({ map, renderState }) {
   const clusterReady = ensureSourceLayer({
     ...getClusterLayerConfig(map),
     data: renderState.clusterGeoJSON,
-    sourceOptions: {
-      cluster: true,
-      clusterRadius: 50,
-      clusterMaxZoom: 10,
-    },
   });
 
   const rawReady = ensureSourceLayer({

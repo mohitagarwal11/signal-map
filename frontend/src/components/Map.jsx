@@ -12,7 +12,7 @@ import { MAX_RAW_TOWERS } from "../map/constants/renderConstants";
 import { removeGeoJSONLayerResources } from "../map/sources/removeGeoJSONResources";
 import { createRenderState } from "../map/state/createRenderState";
 import { renderMap } from "../map/rendering/renderMap";
-// import { hydrateInitialSnapshot } from "../map/bootstrap/hydrateInitialSnapshot";
+import { hydrateInitialSnapshot } from "../map/bootstrap/hydrateInitialSnapshot";
 import { getViewport } from "../utils/getViewport";
 import { clustersToGeoJSON } from "../utils/clustersToGeoJSON";
 import { towersToGeoJSON } from "../utils/towersToGeoJSON";
@@ -127,10 +127,10 @@ export default function Map({ setMapCenter, setTowerCount }) {
 
     const handleMapLoad = () => {
       renderState.mapReady = true;
-      // hydrateInitialSnapshot({
-      //   renderState,
-      //   viewportController,
-      // });
+      hydrateInitialSnapshot({
+        renderState,
+        viewportController,
+      });
       renderMap({
         map,
         renderState,

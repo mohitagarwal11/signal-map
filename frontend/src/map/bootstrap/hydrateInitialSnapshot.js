@@ -1,17 +1,18 @@
-import { clustersToGeoJSON } from "../../utils/clustersToGeoJSON";
-import { INITIAL_CLUSTER_SNAPSHOT } from "../../constants/initialClusters";
+import { heatmapPointsToGeoJSON } from "../../utils/heatmapPointsToGeoJSON";
+// import { INITIAL_CLUSTER_SNAPSHOT } from "../../constants/initialClusters";
+import { INITIAL_HEATMAP_SNAPSHOT } from "../../constants/initialHeatmap";
 
 export function hydrateInitialSnapshot({ renderState, viewportController }) {
   renderState.mode = "cluster";
 
-  renderState.clusterGeoJSON = clustersToGeoJSON(
-    INITIAL_CLUSTER_SNAPSHOT.clusters,
+  renderState.heatmapGeoJSON = heatmapPointsToGeoJSON(
+    INITIAL_HEATMAP_SNAPSHOT.points,
   );
 
   viewportController.hydrateViewport({
-    bounds: INITIAL_CLUSTER_SNAPSHOT.bounds,
-    zoom: INITIAL_CLUSTER_SNAPSHOT.zoom,
-    mode: "cluster",
-    data: INITIAL_CLUSTER_SNAPSHOT.clusters,
+    bounds: INITIAL_HEATMAP_SNAPSHOT.bounds,
+    zoom: INITIAL_HEATMAP_SNAPSHOT.zoom,
+    mode: "heatmap",
+    data: INITIAL_HEATMAP_SNAPSHOT.points,
   });
 }

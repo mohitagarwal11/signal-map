@@ -8,7 +8,6 @@ export function ensureSourceLayer({
   layerId,
   layer,
   data = EMPTY_GEOJSON,
-  sourceOptions = {},
 }) {
   if (!map) {
     return false;
@@ -19,7 +18,6 @@ export function ensureSourceLayer({
       map.addSource(sourceId, {
         type: "geojson",
         data,
-        ...sourceOptions,
       });
     }
 

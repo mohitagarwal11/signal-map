@@ -4,8 +4,8 @@ export const HEATMAP_LAYER = {
   id: HEATMAP_LAYER_ID,
   type: "heatmap",
   source: HEATMAP_SOURCE_ID,
-  minzoom: 0,
-  maxzoom: 9,
+  minzoom: 4,
+  maxzoom: 7,
   paint: {
     "heatmap-weight": 1,
 
@@ -15,30 +15,30 @@ export const HEATMAP_LAYER = {
       ["linear"],
       ["zoom"],
       4,
-      1.4,
+      3,
       5,
-      1.9,
+      2,
       6,
-      2.3,
-      8,
-      2.6,
+      1,
     ],
 
     // Controls smoothing
-    "heatmap-radius": [
+    "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 18],
+
+    // Fade into clusters
+    "heatmap-opacity": [
       "interpolate",
       ["linear"],
       ["zoom"],
       4,
-      18,
+      0.9,
+      5,
+      0.75,
       6,
-      32,
-      8,
-      50,
+      0.5,
+      7,
+      0,
     ],
-
-    // Fade into clusters
-    "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 6, 1, 8, 0],
 
     // Density ramp
     "heatmap-color": [
