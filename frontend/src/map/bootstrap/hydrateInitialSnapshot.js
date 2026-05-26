@@ -1,28 +1,29 @@
 import { heatmapPointsToGeoJSON } from "../../utils/heatmapPointsToGeoJSON";
-import { INITIAL_HEATMAP_SNAPSHOT } from "../../constants/initialHeatmap";
+import { EMPTY_GEOJSON } from "../../map/constants/renderConstants";
 
 export function hydrateInitialSnapshot({
   renderState,
   viewportController,
+  snapshot,
   network = "all",
 }) {
-  if (network !== "all") {
+  if (network !== "all" || !snapshot) {
     return;
   }
 
   renderState.fetchMode = "heatmap";
 
-  renderState.heatmapGeoJSON = heatmapPointsToGeoJSON(
-    INITIAL_HEATMAP_SNAPSHOT.points,
-  );
+  renderState.heatmapGeoJSON = heatmapPointsToGeoJSON(snapshot.points);
 
   renderState.heatmapAvailable = true;
+  renderState.towersAvailable = false;
+  renderState.towersGeoJSON = EMPTY_GEOJSON;
 
   viewportController.hydrateViewport({
-    bounds: INITIAL_HEATMAP_SNAPSHOT.bounds,
-    zoom: INITIAL_HEATMAP_SNAPSHOT.zoom,
+    bounds: snapshot.bounds,
+    zoom: snapshot.zoom,
     mode: "heatmap",
-    data: INITIAL_HEATMAP_SNAPSHOT.points,
+    data: snapshot.points,
     network,
   });
 }

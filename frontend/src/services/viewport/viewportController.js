@@ -3,7 +3,6 @@ import { createViewportKey } from "./viewportKey";
 import { createViewportCache } from "./viewportCache";
 import { expandViewport } from "../../utils/expandViewport";
 import { quantizeViewport } from "../../utils/quantizeViewport";
-import { INITIAL_HEATMAP_SNAPSHOT } from "../../constants/initialHeatmap";
 
 import { devLog } from "../../utils/devLog";
 
@@ -32,8 +31,20 @@ function isAbortError(error) {
   );
 }
 
-function shouldUseInitialHeatmapSnapshot(mode, zoom, network) {
+function shouldUseInitialHeatmapSnapshot(
+  mode,
+  zoom,
+  network,
+  initialHeatmapSnapshot,
+) {
   if (mode !== "heatmap" || typeof zoom !== "number" || network !== "all") {
+    return false;
+  }
+
+  if (
+    !initialHeatmapSnapshot ||
+    !Array.isArray(initialHeatmapSnapshot.points)
+  ) {
     return false;
   }
 
@@ -48,6 +59,7 @@ export function createViewportController(config) {
     fetchHeatmapPoints,
     fetchTowers,
     onData,
+    getInitialHeatmapSnapshot = () => null,
     debounceMs = DEFAULT_DEBOUNCE_MS,
   } = config;
 
@@ -134,12 +146,21 @@ export function createViewportController(config) {
       return;
     }
 
-    if (shouldUseInitialHeatmapSnapshot(mode, zoom, network)) {
+    const initialHeatmapSnapshot = getInitialHeatmapSnapshot();
+
+    if (
+      shouldUseInitialHeatmapSnapshot(
+        mode,
+        zoom,
+        network,
+        initialHeatmapSnapshot,
+      )
+    ) {
       requestId += 1;
       cancelActiveRequest();
       onData({
         mode,
-        data: INITIAL_HEATMAP_SNAPSHOT.points,
+        data: initialHeatmapSnapshot.points,
       });
       return;
     }
