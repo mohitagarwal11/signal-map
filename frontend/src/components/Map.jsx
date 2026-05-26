@@ -254,7 +254,7 @@ export default function Map({
       removeGeoJSONLayerResources(map, HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID);
       removeGeoJSONLayerResources(map, RAW_TOWER_SOURCE_ID, RAW_TOWER_LAYER_ID);
     };
-  }, [setMapCenter, setTowerCount, selectedNetwork, selectedOperator]);
+  }, [setMapCenter, setTowerCount]);
 
   return (
     <div
