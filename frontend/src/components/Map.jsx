@@ -26,18 +26,25 @@ import { createViewportController } from "../services/viewport/viewportControlle
 
 import { devLog } from "../utils/devLog";
 
-export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
+export default function Map({
+  setMapCenter,
+  setTowerCount,
+  selectedNetwork,
+  selectedOperator,
+}) {
   const selectedNetworkRef = useRef(selectedNetwork);
+  const selectedOperatorRef = useRef(selectedOperator);
   const mapRef = useRef(null);
   const requestViewportDataRef = useRef(null);
 
   useEffect(() => {
     selectedNetworkRef.current = selectedNetwork;
+    selectedOperatorRef.current = selectedOperator;
 
     if (requestViewportDataRef.current) {
       requestViewportDataRef.current();
     }
-  }, [selectedNetwork]);
+  }, [selectedNetwork, selectedOperator]);
 
   useEffect(() => {
     const mapplsClient = window.mappls;
@@ -46,11 +53,18 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
 
     const renderState = createRenderState();
 
-    const fetchHeatmapPoints = async ({ bounds, zoom, signal, network }) => {
+    const fetchHeatmapPoints = async ({
+      bounds,
+      zoom,
+      signal,
+      network,
+      operator,
+    }) => {
       const fetchStart = performance.now();
       const response = await getHeatmapPoints(bounds, zoom, {
         signal,
         network,
+        operator,
       });
       const fetchDuration = performance.now() - fetchStart;
 
@@ -59,6 +73,7 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
         pointCount: response.data.length,
         zoom,
         network,
+        operator,
       });
 
       return response.data;
@@ -70,6 +85,7 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
       towerLimit,
       signal,
       network,
+      operator,
     }) => {
       const fetchStart = performance.now();
       const requestedLimit = Number.isFinite(towerLimit)
@@ -78,6 +94,7 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
       const response = await getTowersData(bounds, requestedLimit, 0, {
         signal,
         network,
+        operator,
       });
       const fetchDuration = performance.now() - fetchStart;
       const towers = Array.isArray(response.data.data)
@@ -92,14 +109,15 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
         zoom,
         requestedLimit,
         network,
+        operator,
       });
 
       return cappedTowers;
     };
 
-    const fetchViewportTowerCount = async (bounds, network) => {
+    const fetchViewportTowerCount = async (bounds, network, operator) => {
       const fetchStart = performance.now();
-      const response = await getTowerCount(bounds, { network });
+      const response = await getTowerCount(bounds, { network, operator });
       const fetchDuration = performance.now() - fetchStart;
       const count = Number(response.data?.count ?? 0);
 
@@ -107,6 +125,7 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
         durationMs: Number(fetchDuration.toFixed(2)),
         count,
         network,
+        operator,
       });
 
       setTowerCount(count);
@@ -165,12 +184,13 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
       const bounds = getViewport(currentMap);
       const zoom = currentMap.getZoom();
       const network = selectedNetworkRef.current;
+      const operator = selectedOperatorRef.current;
       const isMaxZoomTowerView = zoom >= 15;
       let towerLimit = MAX_RAW_TOWERS;
 
       if (isMaxZoomTowerView) {
         try {
-          towerLimit = await fetchViewportTowerCount(bounds, network);
+          towerLimit = await fetchViewportTowerCount(bounds, network, operator);
         } catch (error) {
           devLog("Error fetching max-zoom tower count:", error);
         }
@@ -181,10 +201,11 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
         zoom,
         towerLimit,
         network,
+        operator,
       });
 
       if (!isMaxZoomTowerView) {
-        fetchViewportTowerCount(bounds, network).catch((error) => {
+        fetchViewportTowerCount(bounds, network, operator).catch((error) => {
           devLog("Error fetching tower count:", error);
         });
       }
@@ -233,7 +254,7 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
       removeGeoJSONLayerResources(map, HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID);
       removeGeoJSONLayerResources(map, RAW_TOWER_SOURCE_ID, RAW_TOWER_LAYER_ID);
     };
-  }, [setMapCenter, setTowerCount]);
+  }, [setMapCenter, setTowerCount, selectedNetwork, selectedOperator]);
 
   return (
     <div

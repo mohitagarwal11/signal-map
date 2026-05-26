@@ -37,29 +37,32 @@ export default function Dashboard() {
   const [mapCenter, setMapCenter] = useState({ lat: 0, lon: 0 });
 
   const [opDropdown, setOpDropdown] = useState(false);
-  const [selectedOperator, setSelectedOperator] = useState("All Operators");
+  const [selectedOperator, setSelectedOperator] = useState("all");
 
   const [techDropdown, setTechDropdown] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState("all");
 
-  const operators = [
-    "All Operators",
-    "Aircel",
-    "Airtel",
-    "BSNL",
-    "Dishnet Wireless",
-    "Etisalat DB",
-    "HFCL",
-    "Indian Railways GSM-R",
-    "Jio",
-    "Loop Mobile",
-    "MTNL",
-    "MTS India",
-    "S Tel",
-    "Tata Docomo",
-    "Uninor",
-    "Vi",
-    "Videocon Telecom",
+  const operatorOptions = [
+    { value: "all", label: "All Operators" },
+    { value: "Aircel", label: "Aircel" },
+    { value: "Airtel", label: "Airtel" },
+    { value: "BSNL", label: "BSNL" },
+    { value: "Dishnet Wireless", label: "Dishnet Wireless" },
+    { value: "Etisalat DB", label: "Etisalat DB" },
+    { value: "HFCL", label: "HFCL" },
+    {
+      value: "Indian Railways GSM-R",
+      label: "Indian Railways GSM-R",
+    },
+    { value: "Jio", label: "Jio" },
+    { value: "Loop Mobile", label: "Loop Mobile" },
+    { value: "MTNL", label: "MTNL" },
+    { value: "MTS India", label: "MTS India" },
+    { value: "S Tel", label: "S Tel" },
+    { value: "Tata Docomo", label: "Tata Docomo" },
+    { value: "Uninor", label: "Uninor" },
+    { value: "Vi", label: "Vi" },
+    { value: "Videocon Telecom", label: "Videocon Telecom" },
   ];
   const networkOptions = [
     { value: "all", label: "All Networks" },
@@ -72,6 +75,10 @@ export default function Dashboard() {
   const selectedNetworkLabel =
     networkOptions.find((network) => network.value === selectedNetwork)
       ?.label ?? "All Networks";
+
+  const selectedOperatorLabel =
+    operatorOptions.find((operator) => operator.value === selectedOperator)
+      ?.label ?? "All Operators";
 
   return (
     <div className="dashboard">
@@ -112,23 +119,23 @@ export default function Dashboard() {
                 className="dash-dropdown-btn"
                 onClick={() => setOpDropdown((v) => !v)}
               >
-                {selectedOperator}
+                {selectedOperatorLabel}
                 <ChevronDownIcon />
               </button>
               {opDropdown && (
                 <div className="dash-dropdown-menu">
-                  {operators.map((operator) => (
+                  {operatorOptions.map((operator) => (
                     <div
-                      key={operator}
+                      key={operator.value}
                       className={`dash-dropdown-item ${
-                        selectedOperator === operator ? "active" : ""
+                        selectedOperator === operator.value ? "active" : ""
                       }`}
                       onClick={() => {
-                        setSelectedOperator(operator);
+                        setSelectedOperator(operator.value);
                         setOpDropdown(false);
                       }}
                     >
-                      {operator}
+                      {operator.label}
                     </div>
                   ))}
                 </div>
@@ -169,6 +176,7 @@ export default function Dashboard() {
             setMapCenter={setMapCenter}
             setTowerCount={setTowerCount}
             selectedNetwork={selectedNetwork}
+            selectedOperator={selectedOperator}
           />
 
           {/* status bar */}

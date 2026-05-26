@@ -21,8 +21,18 @@ def get_towers_route(
     limit: int = 100,
     offset: int = 0,
     network: str = "all",
+    operator: str = "all",
 ):
-    return get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset, network)
+    return get_towers(
+        min_lat,
+        max_lat,
+        min_lon,
+        max_lon,
+        limit,
+        offset,
+        network,
+        operator,
+    )
 
 
 @router.get("/count")
@@ -32,8 +42,9 @@ def get_towers_count_route(
     min_lon: float,
     max_lon: float,
     network: str = "all",
+    operator: str = "all",
 ):
-    return get_tower_count(min_lat, max_lat, min_lon, max_lon, network)
+    return get_tower_count(min_lat, max_lat, min_lon, max_lon, network, operator)
 
 
 @router.get("/heatmap")
@@ -44,5 +55,14 @@ def get_towers_heatmap_route(
     max_lon: float,
     zoom: float,
     network: str = "all",
+    operator: str = "all",
 ):
-    return get_heatmap_points(min_lat, max_lat, min_lon, max_lon, zoom, network)
+    return get_heatmap_points(
+        min_lat,
+        max_lat,
+        min_lon,
+        max_lon,
+        zoom,
+        network,
+        operator,
+    )

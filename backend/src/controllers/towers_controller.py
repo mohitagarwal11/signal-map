@@ -1,12 +1,22 @@
 import math
 from utils.heatmap_util import get_heatmap_sample_pct, get_heatmap_point_limit
+from utils.operator_util import _build_operator_filter_clause
 from utils.radio_util import _build_radio_filter_clause
 from utils.validation_util import _validate_bounds
 from db.db import engine
 from sqlalchemy import text
 
 
-def get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset, network="all"):
+def get_towers(
+    min_lat,
+    max_lat,
+    min_lon,
+    max_lon,
+    limit,
+    offset,
+    network="all",
+    operator="all",
+):
     min_lat, max_lat, min_lon, max_lon = _validate_bounds(
         min_lat,
         max_lat,
@@ -15,6 +25,10 @@ def get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset, network="all")
     )
 
     radio_filter_clause, radio_params = _build_radio_filter_clause("ct", network)
+    operator_filter_clause, operator_params = _build_operator_filter_clause(
+        "op",
+        operator,
+    )
 
     query = text(f"""
         SELECT
@@ -38,6 +52,7 @@ def get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset, network="all")
             4326
         )::geometry
         {radio_filter_clause}
+        {operator_filter_clause}
         LIMIT :limit
         OFFSET :offset
     """)
@@ -50,6 +65,7 @@ def get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset, network="all")
         "limit": limit,
         "offset": offset,
         **radio_params,
+        **operator_params,
     }
 
     with engine.connect() as conn:
@@ -65,7 +81,14 @@ def get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset, network="all")
     }
 
 
-def get_tower_count(min_lat, max_lat, min_lon, max_lon, network="all"):
+def get_tower_count(
+    min_lat,
+    max_lat,
+    min_lon,
+    max_lon,
+    network="all",
+    operator="all",
+):
     min_lat, max_lat, min_lon, max_lon = _validate_bounds(
         min_lat,
         max_lat,
@@ -77,10 +100,17 @@ def get_tower_count(min_lat, max_lat, min_lon, max_lon, network="all"):
         "cell_towers",
         network,
     )
+    operator_filter_clause, operator_params = _build_operator_filter_clause(
+        "op",
+        operator,
+    )
 
     query = text(f"""
         SELECT COUNT(*) AS count
         FROM cell_towers
+        JOIN operators op
+            ON cell_towers.mcc = op.mcc
+            AND cell_towers.mnc = op.mnc
         WHERE location && ST_MakeEnvelope(
             :min_lon,
             :min_lat,
@@ -89,6 +119,7 @@ def get_tower_count(min_lat, max_lat, min_lon, max_lon, network="all"):
             4326
         )::geometry
         {radio_filter_clause}
+        {operator_filter_clause}
     """)
 
     params = {
@@ -97,6 +128,7 @@ def get_tower_count(min_lat, max_lat, min_lon, max_lon, network="all"):
         "min_lon": min_lon,
         "max_lon": max_lon,
         **radio_params,
+        **operator_params,
     }
 
     with engine.connect() as conn:
@@ -114,6 +146,7 @@ def get_heatmap_points(
     max_lon,
     zoom,
     network="all",
+    operator="all",
 ):
     min_lat, max_lat, min_lon, max_lon = _validate_bounds(
         min_lat,
@@ -129,6 +162,10 @@ def get_heatmap_points(
         "cell_towers",
         network,
     )
+    operator_filter_clause, operator_params = _build_operator_filter_clause(
+        "op",
+        operator,
+    )
 
     query = text(f"""
         SELECT
@@ -136,6 +173,9 @@ def get_heatmap_points(
             longitude::float AS longitude
         FROM cell_towers
         TABLESAMPLE SYSTEM(:sample_pct)
+        JOIN operators op
+            ON cell_towers.mcc = op.mcc
+            AND cell_towers.mnc = op.mnc
         WHERE location IS NOT NULL
             AND latitude IS NOT NULL
             AND longitude IS NOT NULL
@@ -147,6 +187,7 @@ def get_heatmap_points(
                 4326
             )::geometry
             {radio_filter_clause}
+        {operator_filter_clause}
         LIMIT :limit
     """)
 
@@ -158,6 +199,7 @@ def get_heatmap_points(
         "sample_pct": sample_pct,
         "limit": point_limit,
         **radio_params,
+        **operator_params,
     }
 
     with engine.connect() as conn:

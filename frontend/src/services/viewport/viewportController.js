@@ -59,12 +59,18 @@ export function createViewportController(config) {
     }
   }
 
-  function createCacheKey(mode, viewportKey, towerLimit, network = "all") {
+  function createCacheKey(
+    mode,
+    viewportKey,
+    towerLimit,
+    network = "all",
+    operator = "all",
+  ) {
     if (mode === "towers" && typeof towerLimit === "number") {
-      return `${mode}:${network}:${viewportKey}:${towerLimit}`;
+      return `${mode}:${network}:${operator}:${viewportKey}:${towerLimit}`;
     }
 
-    return `${mode}:${network}:${viewportKey}`;
+    return `${mode}:${network}:${operator}:${viewportKey}`;
   }
 
   function getFetchDescriptor({
@@ -73,10 +79,17 @@ export function createViewportController(config) {
     mode = getFetchMode(zoom),
     towerLimit,
     network = "all",
+    operator = "all",
   }) {
     const fetchBounds = createFetchBounds(bounds, mode, zoom);
     const viewportKey = createViewportKey(fetchBounds);
-    const cacheKey = createCacheKey(mode, viewportKey, towerLimit, network);
+    const cacheKey = createCacheKey(
+      mode,
+      viewportKey,
+      towerLimit,
+      network,
+      operator,
+    );
 
     return {
       bounds: fetchBounds,
@@ -84,6 +97,7 @@ export function createViewportController(config) {
       cacheKey,
       towerLimit,
       network,
+      operator,
     };
   }
 
@@ -110,6 +124,7 @@ export function createViewportController(config) {
     cacheKey,
     towerLimit,
     network,
+    operator,
   }) {
     const fetchViewportData = fetchByMode[mode];
 
@@ -169,6 +184,7 @@ export function createViewportController(config) {
       zoom,
       towerLimit,
       network,
+      operator,
       signal: controller.signal,
     })
       .then((data) => {
@@ -203,7 +219,13 @@ export function createViewportController(config) {
     }
   }
 
-  function handleViewportChange({ bounds, zoom, towerLimit, network = "all" }) {
+  function handleViewportChange({
+    bounds,
+    zoom,
+    towerLimit,
+    network = "all",
+    operator = "all",
+  }) {
     clearDebounce();
 
     debounceTimer = window.setTimeout(() => {
@@ -212,6 +234,7 @@ export function createViewportController(config) {
         zoom,
         towerLimit,
         network,
+        operator,
       });
 
       executeRequest({ ...descriptor, zoom }).catch((error) => {

@@ -14,6 +14,7 @@ export const getTowersData = async (bounds, limit, offset, options = {}) => {
         limit,
         offset,
         network: options.network ?? "all",
+        operator: options.operator ?? "all",
       },
     });
     return response;
@@ -33,6 +34,7 @@ export const getTowerCount = async (bounds, options = {}) => {
         min_lon: bounds.min_lon,
         max_lon: bounds.max_lon,
         network: options.network ?? "all",
+        operator: options.operator ?? "all",
       },
     });
     return response;
@@ -53,6 +55,7 @@ export const getHeatmapPoints = async (bounds, zoom, options = {}) => {
         max_lon: bounds.max_lon,
         zoom,
         network: options.network ?? "all",
+        operator: options.operator ?? "all",
       },
     });
 
