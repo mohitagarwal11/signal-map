@@ -2,18 +2,6 @@ import axios from "axios";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-export const getInitialHeatmapSnapshot = async () => {
-  try {
-    const response = await axios.get(
-      `${BACKEND_URL}/bootstrap/initial-heatmap`,
-    );
-    return response;
-  } catch (error) {
-    console.log("Error fetching initial heatmap snapshot:", error);
-    throw error;
-  }
-};
-
 export const getTowersData = async (bounds, limit, offset, options = {}) => {
   try {
     const response = await axios.get(`${BACKEND_URL}/towers`, {

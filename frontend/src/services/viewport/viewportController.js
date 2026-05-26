@@ -18,11 +18,6 @@ const VIEWPORT_QUANTIZATION_STEP = {
   towers: 0.02,
 };
 
-const INITIAL_SNAPSHOT_ZOOM_WINDOW = {
-  min: 3.5,
-  max: 4.5,
-};
-
 function isAbortError(error) {
   return (
     error?.name === "AbortError" ||
@@ -31,35 +26,11 @@ function isAbortError(error) {
   );
 }
 
-function shouldUseInitialHeatmapSnapshot(
-  mode,
-  zoom,
-  network,
-  initialHeatmapSnapshot,
-) {
-  if (mode !== "heatmap" || typeof zoom !== "number" || network !== "all") {
-    return false;
-  }
-
-  if (
-    !initialHeatmapSnapshot ||
-    !Array.isArray(initialHeatmapSnapshot.points)
-  ) {
-    return false;
-  }
-
-  return (
-    zoom >= INITIAL_SNAPSHOT_ZOOM_WINDOW.min &&
-    zoom < INITIAL_SNAPSHOT_ZOOM_WINDOW.max
-  );
-}
-
 export function createViewportController(config) {
   const {
     fetchHeatmapPoints,
     fetchTowers,
     onData,
-    getInitialHeatmapSnapshot = () => null,
     debounceMs = DEFAULT_DEBOUNCE_MS,
   } = config;
 
@@ -143,25 +114,6 @@ export function createViewportController(config) {
     const fetchViewportData = fetchByMode[mode];
 
     if (!fetchViewportData) {
-      return;
-    }
-
-    const initialHeatmapSnapshot = getInitialHeatmapSnapshot();
-
-    if (
-      shouldUseInitialHeatmapSnapshot(
-        mode,
-        zoom,
-        network,
-        initialHeatmapSnapshot,
-      )
-    ) {
-      requestId += 1;
-      cancelActiveRequest();
-      onData({
-        mode,
-        data: initialHeatmapSnapshot.points,
-      });
       return;
     }
 

@@ -13,12 +13,10 @@ import {
 import { removeGeoJSONLayerResources } from "../map/sources/removeGeoJSONResources";
 import { createRenderState } from "../map/state/createRenderState";
 import { renderMap } from "../map/rendering/renderMap";
-import { hydrateInitialSnapshot } from "../map/bootstrap/hydrateInitialSnapshot";
 import { getViewport } from "../utils/getViewport";
 import { heatmapPointsToGeoJSON } from "../utils/heatmapPointsToGeoJSON";
 import { towersToGeoJSON } from "../utils/towersToGeoJSON";
 import {
-  getInitialHeatmapSnapshot,
   getTowerCount,
   getTowersData,
   getHeatmapPoints,
@@ -46,7 +44,6 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
     if (!mapplsClient) return;
 
     const renderState = createRenderState();
-    let initialHeatmapSnapshot = null;
 
     const fetchHeatmapPoints = async ({ bounds, zoom, signal, network }) => {
       const fetchStart = performance.now();
@@ -122,7 +119,6 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
     const viewportController = createViewportController({
       fetchHeatmapPoints,
       fetchTowers,
-      getInitialHeatmapSnapshot: () => initialHeatmapSnapshot,
       debounceMs: 300,
       onData: ({ mode, data }) => {
         renderState.fetchMode = mode;
@@ -191,22 +187,6 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
 
     const handleMapLoad = async () => {
       renderState.mapReady = true;
-
-      if (selectedNetworkRef.current === "all") {
-        try {
-          const response = await getInitialHeatmapSnapshot();
-          initialHeatmapSnapshot = response.data;
-
-          hydrateInitialSnapshot({
-            renderState,
-            viewportController,
-            snapshot: initialHeatmapSnapshot,
-            network: selectedNetworkRef.current,
-          });
-        } catch (error) {
-          devLog("Error fetching initial heatmap snapshot:", error);
-        }
-      }
 
       renderMap({
         map,
