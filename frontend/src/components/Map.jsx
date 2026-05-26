@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { INITIAL_MAP_CONFIG } from "../map/config/mapConfig";
+import { INITIAL_VIEWPORT_BOUNDS } from "../constants/initialViewport";
 import {
   HEATMAP_SOURCE_ID,
   HEATMAP_LAYER_ID,
@@ -116,6 +117,12 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
     const map = new mapplsClient.Map("map", INITIAL_MAP_CONFIG);
     mapRef.current = map;
 
+    const { min_lat, max_lat, min_lon, max_lon } = INITIAL_VIEWPORT_BOUNDS;
+    const sw = [min_lon, min_lat];
+    const ne = [max_lon, max_lat];
+
+    map.setMaxBounds([sw, ne]);
+
     const viewportController = createViewportController({
       fetchHeatmapPoints,
       fetchTowers,
@@ -183,15 +190,26 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
       }
     };
 
+    const syncCenterToDashboard = () => {
+      const center = map.getCenter();
+      setMapCenter({
+        lat: center.lat.toPrecision(6),
+        lon: center.lng.toPrecision(6),
+      });
+    };
+
     requestViewportDataRef.current = requestViewportData;
 
-    const handleMapLoad = async () => {
+    const handleMapLoad = () => {
+      devLog("ZOOM: ", map.getZoom());
       renderState.mapReady = true;
 
       renderMap({
         map,
         renderState,
       });
+
+      syncCenterToDashboard();
 
       requestViewportData();
     };
@@ -200,11 +218,7 @@ export default function Map({ setMapCenter, setTowerCount, selectedNetwork }) {
       devLog("ZOOM: ", map.getZoom());
       requestViewportData();
 
-      const center = map.getCenter();
-      setMapCenter({
-        lat: center.lat.toPrecision(6),
-        lon: center.lng.toPrecision(6),
-      });
+      syncCenterToDashboard();
     };
 
     map.on("load", handleMapLoad);

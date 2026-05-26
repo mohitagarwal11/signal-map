@@ -4,7 +4,7 @@ export const HEATMAP_LAYER = {
   id: HEATMAP_LAYER_ID,
   type: "heatmap",
   source: HEATMAP_SOURCE_ID,
-  minzoom: 4,
+  minzoom: 3,
   maxzoom: 15,
   paint: {
     "heatmap-weight": [

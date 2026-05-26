@@ -1,8 +1,8 @@
 export const INITIAL_VIEWPORT_BOUNDS = {
-  min_lat: 8.066,
-  max_lat: 37.1,
-  min_lon: 68.116,
-  max_lon: 97.416,
+  min_lat: -4,
+  max_lat: 45,
+  min_lon: 50,
+  max_lon: 120,
 };
 
-export const INITIAL_VIEWPORT_ZOOM = 4;
+export const INITIAL_VIEWPORT_ZOOM = 3;
