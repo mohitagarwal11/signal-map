@@ -9,8 +9,20 @@ export const RAW_TOWER_LAYER = {
   source: RAW_TOWER_SOURCE_ID,
   minzoom: 12,
   paint: {
-    "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 3, 12, 3, 15, 4],
-    "circle-color": "#ff5a5a",
+    "circle-radius": [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      10,
+      2.2,
+      12,
+      3.2,
+      15,
+      4.5,
+    ],
+
+    "circle-color": "#ff6262",
+
     "circle-opacity": [
       "interpolate",
       ["linear"],
@@ -18,21 +30,31 @@ export const RAW_TOWER_LAYER = {
       10,
       0,
       11,
-      0.35,
+      0.18,
       11.5,
-      0.45,
+      0.35,
       12,
-      0.72,
+      0.68,
       12.5,
-      0.95,
+      0.9,
       15,
-      0.95,
+      0.96,
     ],
+
     "circle-stroke-color": "#ffffff",
-    "circle-stroke-width": 0.8,
-    "circle-stroke-opacity": 0.7,
-  },
-  layout: {
-    visibility: "visible",
+
+    "circle-stroke-width": [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      10,
+      0.4,
+      12,
+      0.7,
+      15,
+      1.0,
+    ],
+
+    "circle-stroke-opacity": 0.55,
   },
 };
