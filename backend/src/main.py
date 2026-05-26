@@ -23,11 +23,11 @@ app.add_middleware(
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
 app.include_router(towers_router, prefix="/towers", tags=["Towers"])
-app.mount(
-    "/static",
-    StaticFiles(directory=Path(__file__).resolve().parent / "static"),
-    name="static",
-)
+# app.mount(
+#     "/static",
+#     StaticFiles(directory=Path(__file__).resolve().parent / "static"),
+#     name="static",
+# )
 
 
 @app.get("/")

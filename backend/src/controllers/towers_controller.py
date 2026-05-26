@@ -1,80 +1,22 @@
-# this should actually contain all the functions for handling tower data
-import logging
 import math
-import time
-
+from utils.heatmap_util import get_heatmap_sample_pct, get_heatmap_point_limit
+from utils.radio_util import _build_radio_filter_clause
+from utils.validation_util import _validate_bounds
 from db.db import engine
 from sqlalchemy import text
 
-HEATMAP_MAX_POINTS = 12_000
-CLUSTER_LIMIT = 3000
-DEFAULT_CLUSTER_ZOOM = 6.0
-
-logger = logging.getLogger(__name__)
-
-NETWORK_RADIO_MAP = {
-    "2G": ("GSM", "CDMA"),
-    "3G": ("UMTS", "CDMA"),
-    "4G": ("LTE",),
-    "5G": ("NR",),
-}
-
-
-def _get_radio_values(network):
-    if not network or network == "all":
-        return None
-
-    return NETWORK_RADIO_MAP.get(network)
-
-
-def _build_radio_filter_clause(alias, network):
-    radio_values = _get_radio_values(network)
-
-    if not radio_values:
-        return "", {}
-
-    params = {}
-    placeholders = {}
-    parts = []
-
-    for index, radio_value in enumerate(radio_values):
-        param_name = f"radio_{index}"
-        params[param_name] = radio_value
-        parts.append(f":{param_name}")
-
-    return f" AND {alias}.radio IN ({', '.join(parts)})", params
-
-
-def _to_finite_float(value, field_name):
-    try:
-        number = float(value)
-    except (TypeError, ValueError):
-        raise ValueError(f"{field_name} must be a valid number")
-
-    if not math.isfinite(number):
-        raise ValueError(f"{field_name} must be finite")
-
-    return number
-
-
-def _validate_bounds(min_lat, max_lat, min_lon, max_lon):
-    min_lat = _to_finite_float(min_lat, "min_lat")
-    max_lat = _to_finite_float(max_lat, "max_lat")
-    min_lon = _to_finite_float(min_lon, "min_lon")
-    max_lon = _to_finite_float(max_lon, "max_lon")
-
-    if min_lat >= max_lat:
-        return None
-
-    if min_lon >= max_lon:
-        return None
-
-    return min_lat, max_lat, min_lon, max_lon
-
 
 def get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset, network="all"):
+    min_lat, max_lat, min_lon, max_lon = _validate_bounds(
+        min_lat,
+        max_lat,
+        min_lon,
+        max_lon,
+    )
+
     radio_filter_clause, radio_params = _build_radio_filter_clause("ct", network)
-    query = text("""
+
+    query = text(f"""
         SELECT
             ct.radio,
             ct.mcc,
@@ -98,7 +40,7 @@ def get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset, network="all")
         {radio_filter_clause}
         LIMIT :limit
         OFFSET :offset
-    """.format(radio_filter_clause=radio_filter_clause))
+    """)
 
     params = {
         "min_lat": min_lat,
@@ -107,17 +49,14 @@ def get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset, network="all")
         "max_lon": max_lon,
         "limit": limit,
         "offset": offset,
+        **radio_params,
     }
-    params.update(radio_params)
 
     with engine.connect() as conn:
-        result = conn.execute(
-            query,
-            params,
-        )
-        towers = [dict(row._mapping) for row in result]
+        towers = [dict(row) for row in conn.execute(query, params).mappings()]
 
     print(f"Fetched {len(towers)} towers")
+
     return {
         "limit": limit,
         "offset": offset,
@@ -127,11 +66,19 @@ def get_towers(min_lat, max_lat, min_lon, max_lon, limit, offset, network="all")
 
 
 def get_tower_count(min_lat, max_lat, min_lon, max_lon, network="all"):
+    min_lat, max_lat, min_lon, max_lon = _validate_bounds(
+        min_lat,
+        max_lat,
+        min_lon,
+        max_lon,
+    )
+
     radio_filter_clause, radio_params = _build_radio_filter_clause(
         "cell_towers",
         network,
     )
-    query = text("""
+
+    query = text(f"""
         SELECT COUNT(*) AS count
         FROM cell_towers
         WHERE location && ST_MakeEnvelope(
@@ -142,171 +89,78 @@ def get_tower_count(min_lat, max_lat, min_lon, max_lon, network="all"):
             4326
         )::geometry
         {radio_filter_clause}
-    """.format(radio_filter_clause=radio_filter_clause))
+    """)
 
     params = {
         "min_lat": min_lat,
         "max_lat": max_lat,
         "min_lon": min_lon,
         "max_lon": max_lon,
+        **radio_params,
     }
-    params.update(radio_params)
 
     with engine.connect() as conn:
-        result = conn.execute(
-            query,
-            params,
-        )
-        count = result.scalar()
+        count = conn.execute(query, params).scalar()
 
     print(f"Fetched total towers in bounds: {count}")
+
     return {"count": count}
 
 
-def get_heatmap_sample_pct(zoom):
-    try:
-        zoom = _to_finite_float(zoom, "zoom")
-    except ValueError:
-        zoom = DEFAULT_CLUSTER_ZOOM
+def get_heatmap_points(
+    min_lat,
+    max_lat,
+    min_lon,
+    max_lon,
+    zoom,
+    network="all",
+):
+    min_lat, max_lat, min_lon, max_lon = _validate_bounds(
+        min_lat,
+        max_lat,
+        min_lon,
+        max_lon,
+    )
 
-    if zoom < 5:
-        return 0.5
+    sample_pct = get_heatmap_sample_pct(zoom)
+    point_limit = get_heatmap_point_limit(zoom)
 
-    if zoom < 6:
-        return 1.0
+    radio_filter_clause, radio_params = _build_radio_filter_clause(
+        "cell_towers",
+        network,
+    )
 
-    if zoom < 7:
-        return 2.0
+    query = text(f"""
+        SELECT
+            latitude::float AS latitude,
+            longitude::float AS longitude
+        FROM cell_towers
+        TABLESAMPLE SYSTEM(:sample_pct)
+        WHERE location IS NOT NULL
+            AND latitude IS NOT NULL
+            AND longitude IS NOT NULL
+            AND location && ST_MakeEnvelope(
+                :min_lon,
+                :min_lat,
+                :max_lon,
+                :max_lat,
+                4326
+            )::geometry
+            {radio_filter_clause}
+        LIMIT :limit
+    """)
 
-    if zoom < 8:
-        return 5.0
+    params = {
+        "min_lat": min_lat,
+        "max_lat": max_lat,
+        "min_lon": min_lon,
+        "max_lon": max_lon,
+        "sample_pct": sample_pct,
+        "limit": point_limit,
+        **radio_params,
+    }
 
-    if zoom < 9:
-        return 10.0
+    with engine.connect() as conn:
+        points = [dict(row) for row in conn.execute(query, params).mappings()]
 
-    if zoom < 10:
-        return 16.0
-
-    if zoom < 11:
-        return 24.0
-
-    if zoom < 12:
-        return 32.0
-
-    return 40.0
-
-
-def get_heatmap_point_limit(zoom):
-    try:
-        zoom = _to_finite_float(zoom, "zoom")
-    except ValueError:
-        zoom = DEFAULT_CLUSTER_ZOOM
-
-    if zoom < 6:
-        return 3_500
-
-    if zoom < 8:
-        return 6_000
-
-    if zoom < 10:
-        return 9_000
-
-    if zoom < 12:
-        return 11_000
-
-    return HEATMAP_MAX_POINTS
-
-
-def get_heatmap_points(min_lat, max_lat, min_lon, max_lon, zoom, network="all"):
-    try:
-        bounds = _validate_bounds(min_lat, max_lat, min_lon, max_lon)
-
-        if bounds is None:
-            logger.warning(
-                "Invalid heatmap viewport bounds: "
-                "min_lat=%r max_lat=%r min_lon=%r max_lon=%r",
-                min_lat,
-                max_lat,
-                min_lon,
-                max_lon,
-            )
-            return []
-
-        min_lat, max_lat, min_lon, max_lon = bounds
-
-        sample_pct = get_heatmap_sample_pct(zoom)
-        point_limit = get_heatmap_point_limit(zoom)
-        radio_filter_clause, radio_params = _build_radio_filter_clause(
-            "cell_towers",
-            network,
-        )
-
-        query = text("""
-            WITH viewport AS (
-                SELECT ST_MakeEnvelope(
-                    :min_lon,
-                    :min_lat,
-                    :max_lon,
-                    :max_lat,
-                    4326
-                )::geometry AS geom
-            )
-            SELECT
-                latitude::float AS latitude,
-                longitude::float AS longitude
-            FROM cell_towers TABLESAMPLE SYSTEM(:sample_pct),
-                 viewport
-            WHERE location IS NOT NULL
-                AND latitude IS NOT NULL
-                AND longitude IS NOT NULL
-                AND location && viewport.geom
-                {radio_filter_clause}
-            LIMIT :limit
-        """.format(radio_filter_clause=radio_filter_clause))
-
-        params = {
-            "min_lat": min_lat,
-            "max_lat": max_lat,
-            "min_lon": min_lon,
-            "max_lon": max_lon,
-            "sample_pct": sample_pct,
-            "limit": point_limit,
-        }
-        params.update(radio_params)
-
-        query_start = time.perf_counter()
-
-        with engine.connect() as conn:
-            result = conn.execute(
-                query,
-                params,
-            )
-
-            points = [dict(row._mapping) for row in result]
-
-        query_duration_ms = (time.perf_counter() - query_start) * 1000
-
-        logger.info(
-            "PERF heatmap_query duration_ms=%.2f point_count=%s zoom=%s sample_pct=%s point_limit=%s",
-            query_duration_ms,
-            len(points),
-            zoom,
-            sample_pct,
-            point_limit,
-        )
-
-        return points
-
-    except Exception:
-        logger.exception(
-            "Failed to fetch heatmap points for bounds "
-            "min_lat=%r max_lat=%r min_lon=%r max_lon=%r zoom=%r",
-            min_lat,
-            max_lat,
-            min_lon,
-            max_lon,
-            zoom,
-        )
-
-        return []
-
+    return points
