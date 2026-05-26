@@ -12,21 +12,7 @@ import "./Dashboard.css";
 
 /* default panel data */
 const DEFAULT_PANEL = {
-  cluster: "India",
-  lat: "22.6350",
-  lon: "77.2410",
-  score: 88,
-  scoreLabel: "ELITE",
   recommended: { carrier: "Airtel 5G", availability: "94.2%" },
-  towerCount: "12 Active",
-  availability5g: "85%",
-  avgDistance: "420m",
-  heatmapScore: "0.8",
-  benchmarks: [
-    { carrier: "Airtel", score: "92%", latency: "12ms" },
-    { carrier: "Jio", score: "88%", latency: "15ms" },
-    { carrier: "Vi", score: "45%", latency: "28ms" },
-  ],
 };
 
 /* main Dashboard */
@@ -34,6 +20,7 @@ export default function Dashboard() {
   const [panelData] = useState(DEFAULT_PANEL);
 
   const [towerCount, setTowerCount] = useState(2494859);
+  const [operatorDistribution, setOperatorDistribution] = useState([]);
   const [mapCenter, setMapCenter] = useState({ lat: 0, lon: 0 });
 
   const [opDropdown, setOpDropdown] = useState(false);
@@ -66,10 +53,10 @@ export default function Dashboard() {
   ];
   const networkOptions = [
     { value: "all", label: "All Networks" },
-    { value: "2G", label: "2G - GSM, CDMA" },
-    { value: "3G", label: "3G - UMTS, CDMA" },
-    { value: "4G", label: "4G - LTE" },
-    { value: "5G", label: "5G - NR" },
+    { value: "2G", label: "2G" },
+    { value: "3G", label: "3G" },
+    { value: "4G", label: "4G" },
+    { value: "5G", label: "5G" },
   ];
 
   const selectedNetworkLabel =
@@ -79,6 +66,35 @@ export default function Dashboard() {
   const selectedOperatorLabel =
     operatorOptions.find((operator) => operator.value === selectedOperator)
       ?.label ?? "All Operators";
+
+  const operatorDistributionTotal = operatorDistribution.reduce(
+    (sum, operator) => sum + Number(operator.tower_count ?? 0),
+    0,
+  );
+
+  const topOperatorDistribution = operatorDistribution.slice(0, 5);
+  const otherOperatorTowerCount = operatorDistribution
+    .slice(5)
+    .reduce((sum, operator) => sum + Number(operator.tower_count ?? 0), 0);
+
+  const tableRows =
+    otherOperatorTowerCount > 0
+      ? [
+          ...topOperatorDistribution,
+          { operator_name: "Others", tower_count: otherOperatorTowerCount },
+        ]
+      : topOperatorDistribution;
+
+  const topOperator = operatorDistribution[0];
+  const recommendedOperatorName =
+    topOperator?.operator_name ?? panelData.recommended.carrier;
+  const recommendedAvailability =
+    topOperator && operatorDistributionTotal > 0
+      ? `${(
+          (Number(topOperator.tower_count ?? 0) * 100) /
+          operatorDistributionTotal
+        ).toFixed(2)}%`
+      : panelData.recommended.availability;
 
   return (
     <div className="dashboard">
@@ -175,6 +191,7 @@ export default function Dashboard() {
           <Map
             setMapCenter={setMapCenter}
             setTowerCount={setTowerCount}
+            setOperatorDistribution={setOperatorDistribution}
             selectedNetwork={selectedNetwork}
             selectedOperator={selectedOperator}
           />
@@ -202,27 +219,29 @@ export default function Dashboard() {
           </div>
 
           {/* header data */}
-          <h2 className="dash-panel-title">{panelData.cluster}</h2>
-          <p className="dash-panel-subtitle">
+          <p className="dash-panel-header">
             Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
           </p>
 
-          {/* connectivity score */}
+          {/* infrastructure score */}
           <div className="dash-card dash-score-card">
             <div className="dash-score-header">
               <LinkIcon />
-              <span className="dash-score-label">CONNECTIVITY SCORE</span>
+              <span className="dash-score-label">
+                {" "}
+                INFRASTRUCTURE SCORE
+              </span>
             </div>
             <div className="dash-score-body">
               <div className="dash-score-value">
-                {panelData.score}
+                {/* {panelData.score} */}
                 <span className="dash-score-denom">/100</span>
               </div>
-              <span
+              {/* <span
                 className={`dash-score-badge ${panelData.scoreLabel.toLowerCase()}`}
               >
                 {panelData.scoreLabel}
-              </span>
+              </span> */}
             </div>
           </div>
 
@@ -231,11 +250,9 @@ export default function Dashboard() {
             <div className="dash-rec-label">RECOMMENDED SERVICE</div>
             <div className="dash-rec-body">
               <div className="dash-rec-info">
-                <div className="dash-rec-name">
-                  {panelData.recommended.carrier}
-                </div>
+                <div className="dash-rec-name">{recommendedOperatorName}</div>
                 <div className="dash-rec-availability">
-                  {panelData.recommended.availability} Availability
+                  {recommendedAvailability} Availability
                 </div>
               </div>
             </div>
@@ -244,28 +261,33 @@ export default function Dashboard() {
           {/* stats grid */}
           <div className="dash-stats-grid">
             <Card header="Tower Count" value={towerCount} />
-            <Card header="Best Network" value={panelData.bestNetwork} />
             <Card header="Avg. Speed" value={panelData.avgSpeed} />
-            <Card header="Heatmap Score" value={panelData.heatmapScore} />
           </div>
 
-          {/* network benchmark */}
-          <div className="dash-section-label">NETWORK BENCHMARK</div>
+          {/* operator benchmark */}
+          <div className="dash-section-label">OPERATOR DISTRIBUTION</div>
           <div className="dash-table-wrap">
             <table className="dash-table">
               <thead>
                 <tr>
-                  <th>CARRIER</th>
-                  <th>LTE/5G</th>
-                  <th>LATENCY</th>
+                  <th>OPERATOR</th>
+                  <th>TOWER COUNT</th>
+                  <th>PERCENTAGE</th>
                 </tr>
               </thead>
               <tbody>
-                {panelData.benchmarks.map((b) => (
-                  <tr key={b.carrier}>
-                    <td className="dash-td-carrier">{b.carrier}</td>
-                    <td>{b.score}</td>
-                    <td>{b.latency}</td>
+                {tableRows.map((b) => (
+                  <tr key={b.operator_name}>
+                    <td className="dash-td-carrier">{b.operator_name}</td>
+                    <td>{Number(b.tower_count).toLocaleString()}</td>
+                    <td>
+                      {operatorDistributionTotal > 0
+                        ? `${(
+                            (Number(b.tower_count ?? 0) * 100) /
+                            operatorDistributionTotal
+                          ).toFixed(2)}%`
+                        : "0.00%"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

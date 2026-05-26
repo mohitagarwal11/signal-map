@@ -65,3 +65,24 @@ export const getHeatmapPoints = async (bounds, zoom, options = {}) => {
     throw error;
   }
 };
+
+export const getOperatorDistribution = async (bounds, options = {}) => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/towers/operator`, {
+      signal: options.signal,
+      params: {
+        min_lat: bounds.min_lat,
+        max_lat: bounds.max_lat,
+        min_lon: bounds.min_lon,
+        max_lon: bounds.max_lon,
+        network: options.network ?? "all",
+        operator: options.operator ?? "all",
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.log("Error fetching operator distribution:", error);
+    throw error;
+  }
+};

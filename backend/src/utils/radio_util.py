@@ -1,5 +1,5 @@
 NETWORK_RADIO_MAP = {
-    "2G": ("GSM", "CDMA"),
+    "2G": ("GSM",),
     "3G": ("UMTS", "CDMA"),
     "4G": ("LTE",),
     "5G": ("NR",),

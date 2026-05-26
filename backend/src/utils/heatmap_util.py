@@ -1,6 +1,6 @@
 from utils.validation_util import _to_finite_float
 
-HEATMAP_MAX_POINTS = 12_000
+HEATMAP_MAX_POINTS = 18_000
 HEATMAP_MAX_PCT = 50
 
 HEATMAP_SAMPLE_STEPS = (

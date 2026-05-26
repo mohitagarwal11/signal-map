@@ -6,6 +6,7 @@ from controllers.towers_controller import (
     get_tower_count,
     get_towers,
     get_heatmap_points,
+    get_operator_distribution,
 )
 
 router = APIRouter()
@@ -63,6 +64,25 @@ def get_towers_heatmap_route(
         min_lon,
         max_lon,
         zoom,
+        network,
+        operator,
+    )
+
+
+@router.get("/operator")
+def get_towers_operator_route(
+    min_lat: float,
+    max_lat: float,
+    min_lon: float,
+    max_lon: float,
+    network: str = "all",
+    operator: str = "all",
+):
+    return get_operator_distribution(
+        min_lat,
+        max_lat,
+        min_lon,
+        max_lon,
         network,
         operator,
     )

@@ -19,9 +19,9 @@ def _validate_bounds(min_lat, max_lat, min_lon, max_lon):
     max_lon = _to_finite_float(max_lon, "max_lon")
 
     if min_lat >= max_lat:
-        return None
+        raise ValueError("min_lat must be less than max_lat")
 
     if min_lon >= max_lon:
-        return None
+        raise ValueError("min_lon must be less than max_lon")
 
     return min_lat, max_lat, min_lon, max_lon

@@ -21,6 +21,7 @@ import {
   getTowerCount,
   getTowersData,
   getHeatmapPoints,
+  getOperatorDistribution,
 } from "../api/towers.api";
 import { createViewportController } from "../services/viewport/viewportController";
 
@@ -29,6 +30,7 @@ import { devLog } from "../utils/devLog";
 export default function Map({
   setMapCenter,
   setTowerCount,
+  setOperatorDistribution,
   selectedNetwork,
   selectedOperator,
 }) {
@@ -133,6 +135,33 @@ export default function Map({
       return count;
     };
 
+    const fetchViewportOperatorDistribution = async (
+      bounds,
+      network,
+      operator,
+    ) => {
+      const fetchStart = performance.now();
+      const response = await getOperatorDistribution(bounds, {
+        network,
+        operator,
+      });
+      const fetchDuration = performance.now() - fetchStart;
+      const operators = Array.isArray(response.data?.operators)
+        ? response.data.operators
+        : [];
+
+      devLog("PERF operator_distribution_fetch", {
+        durationMs: Number(fetchDuration.toFixed(2)),
+        operatorCount: operators.length,
+        network,
+        operator,
+      });
+
+      setOperatorDistribution(operators);
+
+      return operators;
+    };
+
     const map = new mapplsClient.Map("map", INITIAL_MAP_CONFIG);
     mapRef.current = map;
 
@@ -209,6 +238,12 @@ export default function Map({
           devLog("Error fetching tower count:", error);
         });
       }
+
+      fetchViewportOperatorDistribution(bounds, network, operator).catch(
+        (error) => {
+          devLog("Error fetching operator distribution:", error);
+        },
+      );
     };
 
     const syncCenterToDashboard = () => {
@@ -254,7 +289,7 @@ export default function Map({
       removeGeoJSONLayerResources(map, HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID);
       removeGeoJSONLayerResources(map, RAW_TOWER_SOURCE_ID, RAW_TOWER_LAYER_ID);
     };
-  }, [setMapCenter, setTowerCount]);
+  }, [setMapCenter, setTowerCount, setOperatorDistribution]);
 
   return (
     <div
