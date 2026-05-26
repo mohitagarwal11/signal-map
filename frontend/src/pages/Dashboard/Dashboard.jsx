@@ -100,7 +100,7 @@ export default function Dashboard() {
           {/* search + filters overlay */}
           <div className="dash-map-overlay">
             {/* search box */}
-            <div className="dash-search-box">
+            {/* <div className="dash-search-box">
               <SearchIcon />
               <input
                 type="text"
@@ -108,7 +108,7 @@ export default function Dashboard() {
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
               />
-            </div>
+            </div> */}
             <div className="dash-dropdown-wrap">
               {/* operator dropdown */}
               <button
