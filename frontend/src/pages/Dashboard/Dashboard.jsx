@@ -1,14 +1,20 @@
 import { useState } from "react";
 import Map from "../../components/Map.jsx";
 import Card from "../../components/Card/Card.jsx";
-import { ChevronDownIcon, LinkIcon, MoonIcon, SearchIcon, HelpIcon } from "../../assets/Icons.jsx";
+import {
+  ChevronDownIcon,
+  LinkIcon,
+  MoonIcon,
+  SearchIcon,
+  HelpIcon,
+} from "../../assets/Icons.jsx";
 
 import "./Dashboard.css";
 
 /* default panel data */
 const DEFAULT_PANEL = {
-  cluster: "South Delhi Cluster",
-  lat: "28.5355",
+  cluster: "India",
+  lat: "22.6350",
   lon: "77.2410",
   score: 88,
   scoreLabel: "ELITE",
@@ -39,7 +45,25 @@ export default function Dashboard() {
   const [techDropdown, setTechDropdown] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState("all");
 
-  const operators = ["All Operators", "Airtel", "Jio", "Vi"];
+  const operators = [
+    "All Operators",
+    "Aircel",
+    "Airtel",
+    "BSNL",
+    "Dishnet Wireless",
+    "Etisalat DB",
+    "HFCL",
+    "Indian Railways GSM-R",
+    "Jio",
+    "Loop Mobile",
+    "MTNL",
+    "MTS India",
+    "S Tel",
+    "Tata Docomo",
+    "Uninor",
+    "Vi",
+    "Videocon Telecom",
+  ];
   const networkOptions = [
     { value: "all", label: "All Networks" },
     { value: "2G", label: "2G - GSM, CDMA" },
@@ -215,8 +239,8 @@ export default function Dashboard() {
           {/* stats grid */}
           <div className="dash-stats-grid">
             <Card header="Tower Count" value={towerCount} />
-            <Card header="5G Avaibility" value={panelData.availability5g} />
-            <Card header="Avg. Speed" value={panelData.avgDistance} />
+            <Card header="Best Network" value={panelData.bestNetwork} />
+            <Card header="Avg. Speed" value={panelData.avgSpeed} />
             <Card header="Heatmap Score" value={panelData.heatmapScore} />
           </div>
 
