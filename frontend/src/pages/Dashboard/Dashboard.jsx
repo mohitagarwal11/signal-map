@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Map from "../../components/Map.jsx";
 import Card from "../../components/Card/Card.jsx";
 import {
@@ -18,15 +18,19 @@ const DEFAULT_PANEL = {
 /* main Dashboard */
 export default function Dashboard() {
   const [panelData] = useState(DEFAULT_PANEL);
+  const [statusHelpOpen, setStatusHelpOpen] = useState(false);
+  const statusHelpWrapRef = useRef(null);
 
   const [towerCount, setTowerCount] = useState(2494859);
   const [operatorDistribution, setOperatorDistribution] = useState([]);
   const [mapCenter, setMapCenter] = useState({ lat: 0, lon: 0 });
 
   const [opDropdown, setOpDropdown] = useState(false);
+  const operatorWrapRef = useRef(null);
   const [selectedOperator, setSelectedOperator] = useState("all");
 
   const [techDropdown, setTechDropdown] = useState(false);
+  const networkWrapRef = useRef(null);
   const [selectedNetwork, setSelectedNetwork] = useState("all");
 
   const operatorOptions = [
@@ -96,6 +100,30 @@ export default function Dashboard() {
         ).toFixed(2)}%`
       : panelData.recommended.availability;
 
+  useEffect(() => {
+    function handlePointerDown(event) {
+      const target = event.target;
+
+      if (
+        statusHelpWrapRef.current?.contains(target) ||
+        operatorWrapRef.current?.contains(target) ||
+        networkWrapRef.current?.contains(target)
+      ) {
+        return;
+      }
+
+      setStatusHelpOpen(false);
+      setOpDropdown(false);
+      setTechDropdown(false);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, []);
+
   return (
     <div className="dashboard">
       {/* top navigation bar */}
@@ -107,9 +135,6 @@ export default function Dashboard() {
         <div className="dash-topbar-right">
           <button className="dash-icon-btn">
             <MoonIcon />
-          </button>
-          <button className="dash-icon-btn">
-            <HelpIcon />
           </button>
         </div>
       </header>
@@ -129,10 +154,11 @@ export default function Dashboard() {
                 onChange={(e) => setSearchVal(e.target.value)}
               />
             </div> */}
-            <div className="dash-dropdown-wrap">
+            <div className="dash-dropdown-wrap" ref={operatorWrapRef}>
               {/* operator dropdown */}
               <button
                 className="dash-dropdown-btn"
+                type="button"
                 onClick={() => setOpDropdown((v) => !v)}
               >
                 {selectedOperatorLabel}
@@ -157,10 +183,11 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-            <div className="dash-dropdown-wrap">
+            <div className="dash-dropdown-wrap" ref={networkWrapRef}>
               {/* network dropdown */}
               <button
                 className="dash-dropdown-btn"
+                type="button"
                 onClick={() => setTechDropdown((v) => !v)}
               >
                 {selectedNetworkLabel}
@@ -208,6 +235,33 @@ export default function Dashboard() {
                 Mohit Agarwal
               </a>
             </div>
+            <div className="dash-status-right" ref={statusHelpWrapRef}>
+              <button
+                className="dash-icon-btn dash-status-help-btn"
+                type="button"
+                aria-expanded={statusHelpOpen}
+                aria-label="About the data shown here"
+                onClick={() => setStatusHelpOpen((value) => !value)}
+              >
+              <HelpIcon />
+              </button>
+              {statusHelpOpen && (
+                <div
+                  className="dash-help-popover dash-help-popover-status"
+                  role="note"
+                >
+                  <div className="dash-help-title">Data note</div>
+                  <p className="dash-help-body">
+                    The data shown here is raw, unfiltered tower data sourced
+                    from data.gov.in. It includes records from 2023 or earlier
+                    and has not been cleaned, verified, or updated.
+                    Discrepancies, inaccuracies or oddities in the data are to
+                    be expected. Treat this as a reference snapshot of the
+                    telecom infrastructure as it stood in or before 2023.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -223,14 +277,24 @@ export default function Dashboard() {
             Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
           </p>
 
+          {/* recommended service */}
+          <div className="dash-card">
+            <div className="dash-rec-label">RECOMMENDED SERVICE</div>
+            <div className="dash-rec-body">
+              <div className="dash-rec-info">
+                <div className="dash-rec-name">{recommendedOperatorName}</div>
+                <div className="dash-rec-availability">
+                  {recommendedAvailability} Availability
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* infrastructure score */}
           <div className="dash-card dash-score-card">
             <div className="dash-score-header">
               <LinkIcon />
-              <span className="dash-score-label">
-                {" "}
-                INFRASTRUCTURE SCORE
-              </span>
+              <span className="dash-score-label"> INFRASTRUCTURE SCORE</span>
             </div>
             <div className="dash-score-body">
               <div className="dash-score-value">
@@ -245,23 +309,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* recommended service */}
-          <div className="dash-card">
-            <div className="dash-rec-label">RECOMMENDED SERVICE</div>
-            <div className="dash-rec-body">
-              <div className="dash-rec-info">
-                <div className="dash-rec-name">{recommendedOperatorName}</div>
-                <div className="dash-rec-availability">
-                  {recommendedAvailability} Availability
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* stats grid */}
           <div className="dash-stats-grid">
             <Card header="Tower Count" value={towerCount} />
-            <Card header="Avg. Speed" value={panelData.avgSpeed} />
+            <Card header="IDK YET" value={12345} />
           </div>
 
           {/* operator benchmark */}
