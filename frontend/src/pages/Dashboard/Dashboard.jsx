@@ -5,7 +5,6 @@ import {
   ChevronDownIcon,
   LinkIcon,
   MoonIcon,
-  SearchIcon,
   HelpIcon,
 } from "../../assets/Icons.jsx";
 
@@ -24,9 +23,9 @@ const DEFAULT_PANEL = {
   avgDistance: "420m",
   heatmapScore: "0.8",
   benchmarks: [
-    { carrier: "Airtel", score: "92%", lat: "12ms" },
-    { carrier: "Jio", score: "88%", lat: "15ms" },
-    { carrier: "Vi", score: "45%", lat: "28ms" },
+    { carrier: "Airtel", score: "92%", latency: "12ms" },
+    { carrier: "Jio", score: "88%", latency: "15ms" },
+    { carrier: "Vi", score: "45%", latency: "28ms" },
   ],
 };
 
@@ -36,8 +35,6 @@ export default function Dashboard() {
 
   const [towerCount, setTowerCount] = useState(2494859);
   const [mapCenter, setMapCenter] = useState({ lat: 0, lon: 0 });
-
-  const [searchVal, setSearchVal] = useState("");
 
   const [opDropdown, setOpDropdown] = useState(false);
   const [selectedOperator, setSelectedOperator] = useState("All Operators");
@@ -252,7 +249,7 @@ export default function Dashboard() {
                 <tr>
                   <th>CARRIER</th>
                   <th>LTE/5G</th>
-                  <th>LAT.</th>
+                  <th>LATENCY</th>
                 </tr>
               </thead>
               <tbody>
@@ -260,7 +257,7 @@ export default function Dashboard() {
                   <tr key={b.carrier}>
                     <td className="dash-td-carrier">{b.carrier}</td>
                     <td>{b.score}</td>
-                    <td>{b.lat}</td>
+                    <td>{b.latency}</td>
                   </tr>
                 ))}
               </tbody>
