@@ -24,12 +24,14 @@ import {
 } from "../api/towers.api";
 import { createViewportController } from "../services/viewport/viewportController";
 import { FETCH_DEBOUNCE_MS } from "../constants/initialViewport";
+import { getAreaKm2 } from "../utils/getAreaKm2.js";
 
 export default function Map({
   setMapCenter,
   setOperatorDistribution,
   selectedNetwork,
   selectedOperator,
+  setAreaKm2,
 }) {
   const selectedNetworkRef = useRef(selectedNetwork);
   const selectedOperatorRef = useRef(selectedOperator);
@@ -199,14 +201,18 @@ export default function Map({
 
       if (isMaxZoomTowerView) {
         try {
-          const operators = await viewportController.debouncedFetchOperatorDistribution(
-            bounds,
-            network,
-            operator,
-          );
+          const operators =
+            await viewportController.debouncedFetchOperatorDistribution(
+              bounds,
+              network,
+              operator,
+            );
 
           const totalFromOperators = Array.isArray(operators)
-            ? operators.reduce((sum, op) => sum + Number(op.tower_count ?? 0), 0)
+            ? operators.reduce(
+                (sum, op) => sum + Number(op.tower_count ?? 0),
+                0,
+              )
             : 0;
 
           if (totalFromOperators > 0) {
@@ -216,7 +222,10 @@ export default function Map({
           }
         } catch (error) {
           if (error?.name !== "CanceledError") {
-            console.log("Error fetching operator distribution for towerLimit:", error);
+            console.log(
+              "Error fetching operator distribution for towerLimit:",
+              error,
+            );
           }
         }
       }
@@ -240,7 +249,17 @@ export default function Map({
       }
     };
 
-    const syncCenterToDashboard = () => {
+    const syncDashboard = () => {
+      const bounds = getViewport(map);
+      const area = getAreaKm2(
+        bounds.min_lat,
+        bounds.max_lat,
+        bounds.min_lon,
+        bounds.max_lon,
+      );
+
+      setAreaKm2(Math.round(area * 100) / 100);
+
       const center = map.getCenter();
       setMapCenter({
         lat: center.lat.toPrecision(6),
@@ -259,7 +278,7 @@ export default function Map({
         renderState,
       });
 
-      syncCenterToDashboard();
+      syncDashboard();
 
       requestViewportData();
     };
@@ -268,7 +287,7 @@ export default function Map({
       console.log("ZOOM: ", map.getZoom());
       requestViewportData();
 
-      syncCenterToDashboard();
+      syncDashboard();
     };
 
     map.on("load", handleMapLoad);

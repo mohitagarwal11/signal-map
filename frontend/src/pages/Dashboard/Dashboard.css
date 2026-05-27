@@ -157,7 +157,7 @@
   flex: 1;
 
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 1fr 600px;
 
   min-height: 0;
 }
@@ -317,7 +317,7 @@
 
 /* ═══════ RIGHT PANEL ═══════ */
 .dash-panel {
-  width: 340px;
+  width: 600px;
   background: #f8fafc;
   border-left: 1px solid #dce3ec;
 
@@ -498,7 +498,7 @@
 /* stats grid */
 .dash-stats-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 8px;
 }
 

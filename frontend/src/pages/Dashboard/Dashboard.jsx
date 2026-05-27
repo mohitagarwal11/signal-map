@@ -15,6 +15,9 @@ export default function Dashboard() {
   const [statusHelpOpen, setStatusHelpOpen] = useState(false);
   const statusHelpWrapRef = useRef(null);
 
+  const [panelHelpOpen, setPanelHelpOpen] = useState(false);
+  const panelHelpRef = useRef(null);
+
   const [operatorDistribution, setOperatorDistribution] = useState([]);
   const [mapCenter, setMapCenter] = useState({ lat: 0, lon: 0 });
 
@@ -25,6 +28,8 @@ export default function Dashboard() {
   const [techDropdown, setTechDropdown] = useState(false);
   const networkWrapRef = useRef(null);
   const [selectedNetwork, setSelectedNetwork] = useState("all");
+
+  const [areaKm2, setAreaKm2] = useState(null);
 
   const operatorOptions = [
     { value: "all", label: "All Operators" },
@@ -99,6 +104,10 @@ export default function Dashboard() {
   const topOperator = operatorDistribution[0];
   const recommendedOperatorName = topOperator?.operator_name;
   const recommendedAvailability = getShareText(topOperator?.tower_count);
+  const densityPerKm2 =
+    areaKm2 && operatorDistributionTotal > 0
+      ? operatorDistributionTotal / areaKm2
+      : null;
 
   useEffect(() => {
     function handlePointerDown(event) {
@@ -107,7 +116,8 @@ export default function Dashboard() {
       if (
         statusHelpWrapRef.current?.contains(target) ||
         operatorWrapRef.current?.contains(target) ||
-        networkWrapRef.current?.contains(target)
+        networkWrapRef.current?.contains(target) ||
+        panelHelpRef.current?.contains(target)
       ) {
         return;
       }
@@ -123,6 +133,8 @@ export default function Dashboard() {
       document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, []);
+
+
 
   return (
     <div className="dashboard">
@@ -220,6 +232,7 @@ export default function Dashboard() {
             setOperatorDistribution={setOperatorDistribution}
             selectedNetwork={selectedNetwork}
             selectedOperator={selectedOperator}
+            setAreaKm2={setAreaKm2}
           />
 
           {/* status bar */}
@@ -267,14 +280,38 @@ export default function Dashboard() {
         {/* right insight panel */}
         <aside className="dash-panel">
           {/* header */}
-          <div className="dash-panel-header">
-            <span className="dash-badge">Live Insights</span>
+          <div
+            className="dash-panel-header"
+            style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="dash-badge">Live Insights</span>
+              <div ref={panelHelpRef}>
+                <button
+                  className="dash-icon-btn"
+                  type="button"
+                  aria-expanded={panelHelpOpen}
+                  aria-label="Viewport data note"
+                  onClick={() => setPanelHelpOpen((v) => !v)}
+                >
+                  <HelpIcon />
+                </button>
+
+                {panelHelpOpen && (
+                  <div className="dash-help-popover" role="note">
+                    <div className="dash-help-title">Viewport bounds</div>
+                    <p className="dash-help-body">
+                      Note: Data shown is limited to the current map viewport and
+                      may include regions outside India.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* header data */}
-          <p className="dash-panel-header">
-            Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
-          </p>
+          <p className="dash-panel-header">Lat: {mapCenter.lat} | Lon: {mapCenter.lon}</p>
 
           {/* recommended service */}
           <div className="dash-card">
@@ -313,7 +350,21 @@ export default function Dashboard() {
               header="Tower Count"
               value={operatorDistributionTotal.toLocaleString("en-IN")}
             />
-            {/* <Card header="Operator Sum" value={operatorDistributionTotal.toLocaleString()} /> */}
+            <Card
+              header="Area Km²"
+              value={
+                areaKm2 == null
+                  ? "-"
+                  : `${areaKm2.toLocaleString("en-IN", {
+                      maximumFractionDigits: 2,
+                      minimumFractionDigits: 0,
+                    })}`
+              }
+            />
+            <Card
+              header="Density (towers/km²)"
+              value={densityPerKm2 == null ? "-" : densityPerKm2.toFixed(2)}
+            />
           </div>
 
           {/* operator benchmark */}
