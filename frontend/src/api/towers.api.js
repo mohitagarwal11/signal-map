@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL || import.meta.env.RENDER_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const getTowersData = async (bounds, limit, offset, options = {}) => {
   try {
