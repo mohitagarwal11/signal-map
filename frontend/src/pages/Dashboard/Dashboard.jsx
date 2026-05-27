@@ -7,7 +7,7 @@ import {
   MoonIcon,
   HelpIcon,
 } from "../../assets/Icons.jsx";
-
+import MapBanner from "../../components/MapBanner/MapBanner.jsx";
 import "./Dashboard.css";
 
 /* main Dashboard */
@@ -134,8 +134,6 @@ export default function Dashboard() {
     };
   }, []);
 
-
-
   return (
     <div className="dashboard">
       {/* top navigation bar */}
@@ -154,6 +152,7 @@ export default function Dashboard() {
       {/* main body */}
       <div className="dash-body">
         <div className="dash-map-area">
+          <MapBanner />
           {/* search + filters overlay */}
           <div className="dash-map-overlay">
             {/* search box */}
@@ -282,7 +281,11 @@ export default function Dashboard() {
           {/* header */}
           <div
             className="dash-panel-header"
-            style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span className="dash-badge">Live Insights</span>
@@ -301,8 +304,8 @@ export default function Dashboard() {
                   <div className="dash-help-popover" role="note">
                     <div className="dash-help-title">Viewport bounds</div>
                     <p className="dash-help-body">
-                      Note: Data shown is limited to the current map viewport and
-                      may include regions outside India.
+                      Note: Data shown is limited to the current map viewport
+                      and may include regions outside India.
                     </p>
                   </div>
                 )}
@@ -311,7 +314,9 @@ export default function Dashboard() {
           </div>
 
           {/* header data */}
-          <p className="dash-panel-header">Lat: {mapCenter.lat} | Lon: {mapCenter.lon}</p>
+          <p className="dash-panel-header">
+            Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
+          </p>
 
           {/* recommended service */}
           <div className="dash-card">
@@ -327,7 +332,7 @@ export default function Dashboard() {
           </div>
 
           {/* infrastructure score */}
-          <div className="dash-card dash-score-card">
+          {/* <div className="dash-card dash-score-card">
             <div className="dash-score-header">
               <LinkIcon />
               <span className="dash-score-label"> INFRASTRUCTURE SCORE</span>
@@ -336,13 +341,13 @@ export default function Dashboard() {
               <div className="dash-score-value">
                 <span className="dash-score-denom">/100</span>
               </div>
-              {/* <span
+              <span
                 className={`dash-score-badge ${panelData.scoreLabel.toLowerCase()}`}
               >
                 {panelData.scoreLabel}
-              </span> */}
+              </span>
             </div>
-          </div>
+          </div> */}
 
           {/* stats grid */}
           <div className="dash-stats-grid">

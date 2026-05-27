@@ -1,5 +1,10 @@
 .dashboard {
   --topbar-height: 46px;
+  --panel-width: clamp(340px, 30vw, 760px);
+  --panel-padding: clamp(12px, 1.2vw, 16px);
+  --panel-gap: clamp(8px, 0.9vw, 10px);
+  --panel-title-size: clamp(24px, 2.6vw, 30px);
+  --panel-value-size: clamp(30px, 3.6vw, 40px);
 
   display: flex;
   flex-direction: column;
@@ -157,7 +162,8 @@
   flex: 1;
 
   display: grid;
-  grid-template-columns: 1fr 600px;
+  grid-template-columns: minmax(0, 1fr) var(--panel-width);
+  height: 100%;
 
   min-height: 0;
 }
@@ -237,7 +243,7 @@
 }
 
 .dash-dropdown-btn:hover {
-  border-color: #cbd5e1;
+  border-color: var(--blue);
 }
 
 .dash-dropdown-btn svg {
@@ -317,7 +323,7 @@
 
 /* ═══════ RIGHT PANEL ═══════ */
 .dash-panel {
-  width: 600px;
+  width: 100%;
   background: #f8fafc;
   border-left: 1px solid #dce3ec;
 
@@ -328,11 +334,11 @@
 
   min-height: 0;
 
-  padding: 16px;
+  padding: var(--panel-padding);
 
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--panel-gap);
 }
 
 /* panel header */
@@ -344,16 +350,16 @@
   align-items: center;
   text-align: center;
 
-  gap: 8px;
+  gap: clamp(6px, 0.7vw, 8px);
 }
 
 .dash-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  padding: clamp(3px, 0.35vw, 4px) clamp(8px, 0.9vw, 10px);
   background: var(--blue);
   color: #ffffff;
-  font-size: 10px;
+  font-size: clamp(9px, 0.75vw, 10px);
   font-weight: 800;
   letter-spacing: 0.8px;
   border-radius: var(--radius-sm);
@@ -361,17 +367,16 @@
 
 .dash-panel-title {
   text-align: center;
-  font-size: 30px;
+  font-size: var(--panel-title-size);
   font-weight: 800;
   color: var(--text-primary);
-  line-height: 0.5;
+  line-height: 1.05;
 }
 
 .dash-panel-subtitle {
   text-align: center;
-  font-size: 13px;
+  font-size: clamp(12px, 1vw, 13px);
   color: var(--text-secondary);
-  margin-top: -10px;
   font-weight: 400;
 }
 
@@ -380,7 +385,7 @@
   background: #ffffff;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 16px;
+  padding: var(--panel-padding);
 }
 
 /* connectivity score */
@@ -388,11 +393,11 @@
   background: white;
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 18px;
+  padding: clamp(14px, 1.35vw, 18px);
 
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: clamp(10px, 1vw, 14px);
 }
 
 .dash-score-header {
@@ -408,7 +413,7 @@
 }
 
 .dash-score-label {
-  font-size: 11px;
+  font-size: clamp(10px, 0.9vw, 11px);
   font-weight: 700;
   letter-spacing: 0.8px;
 }
@@ -421,14 +426,14 @@
 }
 
 .dash-score-value {
-  font-size: 40px;
+  font-size: var(--panel-value-size);
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -2px;
+  letter-spacing: -0.5px;
 }
 
 .dash-score-denom {
-  font-size: 18px;
+  font-size: clamp(14px, 1.2vw, 18px);
   font-weight: 400;
   color: var(--text-muted);
   margin-left: 4px;
@@ -437,9 +442,9 @@
 .dash-score-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: clamp(3px, 0.35vw, 4px) clamp(10px, 1vw, 12px);
   border-radius: 20px;
-  font-size: 11px;
+  font-size: clamp(10px, 0.9vw, 11px);
   font-weight: 800;
   letter-spacing: 0.6px;
   margin-bottom: 6px;
@@ -463,17 +468,16 @@
 
 /* recommended service */
 .dash-rec-label {
-  font-size: 10px;
+  font-size: clamp(9px, 0.8vw, 10px);
   font-weight: 700;
   color: var(--text-muted);
   letter-spacing: 0.6px;
-  margin-bottom: 10px;
 }
 
 .dash-rec-body {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: clamp(8px, 0.9vw, 12px);
 }
 
 .dash-rec-info {
@@ -484,13 +488,13 @@
 }
 
 .dash-rec-name {
-  font-size: 20px;
+  font-size: clamp(16px, 1.5vw, 20px);
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .dash-rec-availability {
-  font-size: 13px;
+  font-size: clamp(12px, 1vw, 13px);
   font-weight: 500;
   color: var(--green);
 }
@@ -499,14 +503,14 @@
 .dash-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 8px;
+  gap: clamp(6px, 0.7vw, 8px);
 }
 
 /* network benchmark */
 .dash-section-label {
   display: flex;
   justify-content: center;
-  font-size: 10px;
+  font-size: clamp(9px, 0.8vw, 10px);
   font-weight: 700;
   color: var(--text-muted);
   letter-spacing: 0.7px;
@@ -517,18 +521,19 @@
   border: 1px solid var(--border);
   border-radius: 10px;
   background: white;
+  overflow: hidden;
 }
 
 .dash-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: clamp(11px, 1vw, 13px);
 }
 
 .dash-table thead th {
-  padding: 10px 12px;
+  padding: clamp(9px, 0.9vw, 10px) clamp(10px, 1vw, 12px);
   text-align: left;
-  font-size: 9px;
+  font-size: clamp(8px, 0.75vw, 9px);
   font-weight: 700;
   color: var(--text-muted);
   letter-spacing: 0.7px;
@@ -537,7 +542,7 @@
 }
 
 .dash-table tbody td {
-  padding: 12px;
+  padding: clamp(10px, 1vw, 12px);
   color: var(--text-primary);
   font-weight: 600;
   border-bottom: 1px solid #eef2f7;
@@ -550,4 +555,54 @@
 .dash-td-carrier {
   color: var(--blue) !important;
   font-weight: 700 !important;
+}
+
+.dash-panel-header > div:first-child {
+  width: 100%;
+}
+
+.dash-panel-header > p {
+  margin: 0;
+}
+
+.dash-panel .dash-card,
+.dash-panel .dash-score-card {
+  min-width: 0;
+}
+
+.dash-dropdown-btn {
+  border-color: #cbd5e1;
+}
+
+.dash-dropdown-btn:hover {
+  border-color: var(--blue);
+}
+
+.dash-help-popover-status::before {
+  right: 14px;
+  transform: rotate(45deg);
+}
+
+@supports not (container-type: inline-size) {
+  .dash-panel {
+    contain: paint;
+  }
+}
+
+@media (max-width: 1200px) {
+  .dash-body {
+    grid-template-columns: minmax(0, 1fr) clamp(320px, 36vw, 440px);
+  }
+}
+
+@media (max-width: 900px) {
+  .dash-body {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .dash-panel {
+    border-left: none;
+    border-top: 1px solid #dce3ec;
+  }
 }
