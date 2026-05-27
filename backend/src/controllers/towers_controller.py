@@ -1,4 +1,4 @@
-from utils.heatmap_util import get_heatmap_sample_pct, get_heatmap_point_limit
+from utils.heatmap_util import get_heatmap_point_limit
 from utils.operator_util import _build_operator_filter_clause
 from utils.radio_util import _build_radio_filter_clause
 from utils.validation_util import _validate_bounds
@@ -148,7 +148,6 @@ def get_heatmap_points(
         max_lon,
     )
 
-    sample_pct = get_heatmap_sample_pct(zoom)
     point_limit = get_heatmap_point_limit(zoom)
 
     radio_filter_clause, radio_params = _build_radio_filter_clause(
@@ -166,7 +165,6 @@ def get_heatmap_points(
             ct.latitude::float AS latitude,
             ct.longitude::float AS longitude
         FROM cell_towers ct
-        TABLESAMPLE SYSTEM(:sample_pct)
         WHERE ct.location && ST_MakeEnvelope(
                 :min_lon,
                 :min_lat,
@@ -184,7 +182,6 @@ def get_heatmap_points(
         "max_lat": max_lat,
         "min_lon": min_lon,
         "max_lon": max_lon,
-        "sample_pct": sample_pct,
         "limit": point_limit,
         **radio_params,
         **operator_params,
