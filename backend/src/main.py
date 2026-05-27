@@ -35,6 +35,6 @@ def read_root():
     return {"message": "Server is Live"}
 
 
-@app.get("/health")
+@app.head("/health")
 def health_check():
     return {"status": "ok"}
