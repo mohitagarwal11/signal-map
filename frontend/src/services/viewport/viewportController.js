@@ -4,9 +4,8 @@ import { createViewportCache } from "./viewportCache";
 import { expandViewport } from "../../utils/expandViewport";
 import { quantizeViewport } from "../../utils/quantizeViewport";
 
-import { devLog } from "../../utils/devLog";
-
-const DEFAULT_DEBOUNCE_MS = 300;
+import { FETCH_DEBOUNCE_MS } from "../../constants/initialViewport";
+import { debounceAsync } from "../../utils/debounceAsync";
 
 const VIEWPORT_EXPANSION_FACTOR = {
   heatmap: 0.3,
@@ -30,8 +29,10 @@ export function createViewportController(config) {
   const {
     fetchHeatmapPoints,
     fetchTowers,
+    fetchTowerCount,
+    fetchOperatorDistribution,
     onData,
-    debounceMs = DEFAULT_DEBOUNCE_MS,
+    debounceMs = FETCH_DEBOUNCE_MS,
   } = config;
 
   let debounceTimer = null;
@@ -44,6 +45,13 @@ export function createViewportController(config) {
     heatmap: fetchHeatmapPoints,
     towers: fetchTowers,
   };
+
+  const debouncedFetchTowerCount = debounceAsync(fetchTowerCount, debounceMs);
+
+  const debouncedFetchOperatorDistribution = debounceAsync(
+    fetchOperatorDistribution,
+    debounceMs,
+  );
 
   function clearDebounce() {
     if (debounceTimer) {
@@ -133,7 +141,7 @@ export function createViewportController(config) {
     }
 
     if (viewportCache.has(cacheKey)) {
-      devLog("CACHE HIT", cacheKey);
+      console.log("CACHE HIT", cacheKey);
       requestId += 1;
       cancelActiveRequest();
       onData({
@@ -143,10 +151,10 @@ export function createViewportController(config) {
       return;
     }
 
-    devLog("CACHE MISS", cacheKey);
+    console.log("CACHE MISS", cacheKey);
 
     if (inFlightRequests.has(cacheKey)) {
-      devLog("REQUEST REUSED", cacheKey);
+      console.log("REQUEST REUSED", cacheKey);
 
       const currentRequestId = requestId + 1;
       requestId = currentRequestId;
@@ -238,7 +246,7 @@ export function createViewportController(config) {
       });
 
       executeRequest({ ...descriptor, zoom }).catch((error) => {
-        devLog("Error fetching viewport data:", error);
+        console.log("Error fetching viewport data:", error);
       });
     }, debounceMs);
   }
@@ -246,7 +254,7 @@ export function createViewportController(config) {
   function hydrateViewport({ bounds, zoom, mode, data, network = "all" }) {
     const { cacheKey } = getFetchDescriptor({ bounds, zoom, mode, network });
     viewportCache.set(cacheKey, data);
-    devLog("CACHE HYDRATED", cacheKey);
+    console.log("CACHE HYDRATED", cacheKey);
   }
 
   function destroy() {
@@ -258,6 +266,8 @@ export function createViewportController(config) {
 
   return {
     handleViewportChange,
+    debouncedFetchTowerCount,
+    debouncedFetchOperatorDistribution,
     hydrateViewport,
     destroy,
   };

@@ -1,6 +1,4 @@
 import { EMPTY_GEOJSON } from "../constants/renderConstants";
-import { getMapLayer } from "../sources/getMapLayer";
-import { getMapSource } from "../sources/getMapSource";
 
 export function ensureSourceLayer({
   map,
@@ -14,14 +12,14 @@ export function ensureSourceLayer({
   }
 
   try {
-    if (!getMapSource(map, sourceId)) {
+    if (!map.getSource || !map.getSource(sourceId)) {
       map.addSource(sourceId, {
         type: "geojson",
         data,
       });
     }
 
-    if (!getMapLayer(map, layerId)) {
+    if (!map.getLayer || !map.getLayer(layerId)) {
       map.addLayer(layer);
     }
   } catch (error) {
@@ -29,5 +27,5 @@ export function ensureSourceLayer({
     return false;
   }
 
-  return Boolean(getMapSource(map, sourceId));
+  return Boolean(map.getSource && map.getSource(sourceId));
 }

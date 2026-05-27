@@ -24,8 +24,7 @@ import {
   getOperatorDistribution,
 } from "../api/towers.api";
 import { createViewportController } from "../services/viewport/viewportController";
-
-import { devLog } from "../utils/devLog";
+import { FETCH_DEBOUNCE_MS } from "../constants/initialViewport";
 
 export default function Map({
   setMapCenter,
@@ -70,7 +69,7 @@ export default function Map({
       });
       const fetchDuration = performance.now() - fetchStart;
 
-      devLog("PERF heatmap_fetch", {
+      console.log("PERF heatmap_fetch", {
         durationMs: Number(fetchDuration.toFixed(2)),
         pointCount: response.data.length,
         zoom,
@@ -104,7 +103,7 @@ export default function Map({
         : [];
       const cappedTowers = towers.slice(0, requestedLimit);
 
-      devLog("PERF raw_fetch", {
+      console.log("PERF raw_fetch", {
         durationMs: Number(fetchDuration.toFixed(2)),
         returnedCount: towers.length,
         renderedCount: cappedTowers.length,
@@ -123,7 +122,7 @@ export default function Map({
       const fetchDuration = performance.now() - fetchStart;
       const count = Number(response.data?.count ?? 0);
 
-      devLog("PERF tower_count_fetch", {
+      console.log("PERF tower_count_fetch", {
         durationMs: Number(fetchDuration.toFixed(2)),
         count,
         network,
@@ -150,7 +149,7 @@ export default function Map({
         ? response.data.operators
         : [];
 
-      devLog("PERF operator_distribution_fetch", {
+      console.log("PERF operator_distribution_fetch", {
         durationMs: Number(fetchDuration.toFixed(2)),
         operatorCount: operators.length,
         network,
@@ -174,7 +173,9 @@ export default function Map({
     const viewportController = createViewportController({
       fetchHeatmapPoints,
       fetchTowers,
-      debounceMs: 300,
+      fetchTowerCount: fetchViewportTowerCount,
+      fetchOperatorDistribution: fetchViewportOperatorDistribution,
+      debounceMs: FETCH_DEBOUNCE_MS,
       onData: ({ mode, data }) => {
         renderState.fetchMode = mode;
 
@@ -219,9 +220,15 @@ export default function Map({
 
       if (isMaxZoomTowerView) {
         try {
-          towerLimit = await fetchViewportTowerCount(bounds, network, operator);
+          towerLimit = await viewportController.debouncedFetchTowerCount(
+            bounds,
+            network,
+            operator,
+          );
         } catch (error) {
-          devLog("Error fetching max-zoom tower count:", error);
+          if (error?.name !== "CanceledError") {
+            console.log("Error fetching max-zoom tower count:", error);
+          }
         }
       }
 
@@ -234,16 +241,22 @@ export default function Map({
       });
 
       if (!isMaxZoomTowerView) {
-        fetchViewportTowerCount(bounds, network, operator).catch((error) => {
-          devLog("Error fetching tower count:", error);
-        });
+        viewportController
+          .debouncedFetchTowerCount(bounds, network, operator)
+          .catch((error) => {
+            if (error?.name !== "CanceledError") {
+              console.log("Error fetching tower count:", error);
+            }
+          });
       }
 
-      fetchViewportOperatorDistribution(bounds, network, operator).catch(
-        (error) => {
-          devLog("Error fetching operator distribution:", error);
-        },
-      );
+      viewportController
+        .debouncedFetchOperatorDistribution(bounds, network, operator)
+        .catch((error) => {
+          if (error?.name !== "CanceledError") {
+            console.log("Error fetching operator distribution:", error);
+          }
+        });
     };
 
     const syncCenterToDashboard = () => {
@@ -257,7 +270,7 @@ export default function Map({
     requestViewportDataRef.current = requestViewportData;
 
     const handleMapLoad = () => {
-      devLog("ZOOM: ", map.getZoom());
+      console.log("ZOOM: ", map.getZoom());
       renderState.mapReady = true;
 
       renderMap({
@@ -271,7 +284,7 @@ export default function Map({
     };
 
     const handleMoveEnd = () => {
-      devLog("ZOOM: ", map.getZoom());
+      console.log("ZOOM: ", map.getZoom());
       requestViewportData();
 
       syncCenterToDashboard();

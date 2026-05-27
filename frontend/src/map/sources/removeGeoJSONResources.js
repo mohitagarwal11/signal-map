@@ -1,16 +1,13 @@
-import { getMapLayer } from "./getMapLayer";
-import { getMapSource } from "./getMapSource";
-
 export function removeGeoJSONLayerResources(map, sourceId, layerId) {
   if (!map) {
     return;
   }
 
-  if (getMapLayer(map, layerId)) {
+  if (map.getLayer && map.getLayer(layerId)) {
     map.removeLayer(layerId);
   }
 
-  if (getMapSource(map, sourceId)) {
+  if (map.getSource && map.getSource(sourceId)) {
     map.removeSource(sourceId);
   }
 }

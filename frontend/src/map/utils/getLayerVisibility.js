@@ -1,7 +1,5 @@
-import { getMapLayer } from "../sources/getMapLayer";
-
 export function getLayerVisibility(map, layerId) {
-  if (!map || !getMapLayer(map, layerId)) {
+  if (!map || (typeof map.getLayer === "function" && !map.getLayer(layerId))) {
     return "missing";
   }
 

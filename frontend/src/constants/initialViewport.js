@@ -6,3 +6,5 @@ export const INITIAL_VIEWPORT_BOUNDS = {
 };
 
 export const INITIAL_VIEWPORT_ZOOM = 3;
+
+export const FETCH_DEBOUNCE_MS = 300;
