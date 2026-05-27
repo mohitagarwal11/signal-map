@@ -25,7 +25,9 @@ export default function MapBanner() {
 
   return (
     <div className="dash-map-banner">
-      <span>Map/Heatmap not loading?</span>
+      <span>
+        Map/Heatmap not loading? Try refreshing and zooming in and out.
+      </span>
       <button onClick={refresh} className="dash-map-banner-refresh">
         <RefreshIcon /> Refresh
       </button>
