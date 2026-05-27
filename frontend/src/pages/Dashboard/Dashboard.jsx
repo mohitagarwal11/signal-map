@@ -10,18 +10,11 @@ import {
 
 import "./Dashboard.css";
 
-/* default panel data */
-const DEFAULT_PANEL = {
-  recommended: { carrier: "Airtel 5G", availability: "94.2%" },
-};
-
 /* main Dashboard */
 export default function Dashboard() {
-  const [panelData] = useState(DEFAULT_PANEL);
   const [statusHelpOpen, setStatusHelpOpen] = useState(false);
   const statusHelpWrapRef = useRef(null);
 
-  const [towerCount, setTowerCount] = useState(2494859);
   const [operatorDistribution, setOperatorDistribution] = useState([]);
   const [mapCenter, setMapCenter] = useState({ lat: 0, lon: 0 });
 
@@ -64,12 +57,10 @@ export default function Dashboard() {
   ];
 
   const selectedNetworkLabel =
-    networkOptions.find((network) => network.value === selectedNetwork)
-      ?.label ?? "All Networks";
+    selectedNetwork === "all" ? "All Networks" : selectedNetwork;
 
   const selectedOperatorLabel =
-    operatorOptions.find((operator) => operator.value === selectedOperator)
-      ?.label ?? "All Operators";
+    selectedOperator === "all" ? "All Operators" : selectedOperator;
 
   const operatorDistributionTotal = operatorDistribution.reduce(
     (sum, operator) => sum + Number(operator.tower_count ?? 0),
@@ -89,16 +80,25 @@ export default function Dashboard() {
         ]
       : topOperatorDistribution;
 
+  const getShareText = (towerCount) => {
+    if (operatorDistributionTotal <= 0) {
+      return "0.00%";
+    }
+
+    return `${(
+      (Number(towerCount ?? 0) * 100) /
+      operatorDistributionTotal
+    ).toFixed(2)}%`;
+  };
+
+  const tableRowsWithShare = tableRows.map((row) => ({
+    ...row,
+    shareText: getShareText(row.tower_count),
+  }));
+
   const topOperator = operatorDistribution[0];
-  const recommendedOperatorName =
-    topOperator?.operator_name ?? panelData.recommended.carrier;
-  const recommendedAvailability =
-    topOperator && operatorDistributionTotal > 0
-      ? `${(
-          (Number(topOperator.tower_count ?? 0) * 100) /
-          operatorDistributionTotal
-        ).toFixed(2)}%`
-      : panelData.recommended.availability;
+  const recommendedOperatorName = topOperator?.operator_name;
+  const recommendedAvailability = getShareText(topOperator?.tower_count);
 
   useEffect(() => {
     function handlePointerDown(event) {
@@ -217,7 +217,6 @@ export default function Dashboard() {
           {/* map */}
           <Map
             setMapCenter={setMapCenter}
-            setTowerCount={setTowerCount}
             setOperatorDistribution={setOperatorDistribution}
             selectedNetwork={selectedNetwork}
             selectedOperator={selectedOperator}
@@ -243,7 +242,7 @@ export default function Dashboard() {
                 aria-label="About the data shown here"
                 onClick={() => setStatusHelpOpen((value) => !value)}
               >
-              <HelpIcon />
+                <HelpIcon />
               </button>
               {statusHelpOpen && (
                 <div
@@ -298,7 +297,6 @@ export default function Dashboard() {
             </div>
             <div className="dash-score-body">
               <div className="dash-score-value">
-                {/* {panelData.score} */}
                 <span className="dash-score-denom">/100</span>
               </div>
               {/* <span
@@ -311,8 +309,11 @@ export default function Dashboard() {
 
           {/* stats grid */}
           <div className="dash-stats-grid">
-            <Card header="Tower Count" value={towerCount} />
-            <Card header="IDK YET" value={12345} />
+            <Card
+              header="Tower Count"
+              value={operatorDistributionTotal.toLocaleString("en-IN")}
+            />
+            {/* <Card header="Operator Sum" value={operatorDistributionTotal.toLocaleString()} /> */}
           </div>
 
           {/* operator benchmark */}
@@ -323,22 +324,15 @@ export default function Dashboard() {
                 <tr>
                   <th>OPERATOR</th>
                   <th>TOWER COUNT</th>
-                  <th>PERCENTAGE</th>
+                  <th>%.SHARE</th>
                 </tr>
               </thead>
               <tbody>
-                {tableRows.map((b) => (
+                {tableRowsWithShare.map((b) => (
                   <tr key={b.operator_name}>
                     <td className="dash-td-carrier">{b.operator_name}</td>
-                    <td>{Number(b.tower_count).toLocaleString()}</td>
-                    <td>
-                      {operatorDistributionTotal > 0
-                        ? `${(
-                            (Number(b.tower_count ?? 0) * 100) /
-                            operatorDistributionTotal
-                          ).toFixed(2)}%`
-                        : "0.00%"}
-                    </td>
+                    <td>{Number(b.tower_count).toLocaleString("en-IN")}</td>
+                    <td>{b.shareText}</td>
                   </tr>
                 ))}
               </tbody>

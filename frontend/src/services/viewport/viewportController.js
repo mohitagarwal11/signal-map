@@ -29,7 +29,6 @@ export function createViewportController(config) {
   const {
     fetchHeatmapPoints,
     fetchTowers,
-    fetchTowerCount,
     fetchOperatorDistribution,
     onData,
     debounceMs = FETCH_DEBOUNCE_MS,
@@ -45,8 +44,6 @@ export function createViewportController(config) {
     heatmap: fetchHeatmapPoints,
     towers: fetchTowers,
   };
-
-  const debouncedFetchTowerCount = debounceAsync(fetchTowerCount, debounceMs);
 
   const debouncedFetchOperatorDistribution = debounceAsync(
     fetchOperatorDistribution,
@@ -266,7 +263,6 @@ export function createViewportController(config) {
 
   return {
     handleViewportChange,
-    debouncedFetchTowerCount,
     debouncedFetchOperatorDistribution,
     hydrateViewport,
     destroy,

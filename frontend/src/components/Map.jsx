@@ -18,7 +18,6 @@ import { getViewport } from "../utils/getViewport";
 import { heatmapPointsToGeoJSON } from "../utils/heatmapPointsToGeoJSON";
 import { towersToGeoJSON } from "../utils/towersToGeoJSON";
 import {
-  getTowerCount,
   getTowersData,
   getHeatmapPoints,
   getOperatorDistribution,
@@ -28,7 +27,6 @@ import { FETCH_DEBOUNCE_MS } from "../constants/initialViewport";
 
 export default function Map({
   setMapCenter,
-  setTowerCount,
   setOperatorDistribution,
   selectedNetwork,
   selectedOperator,
@@ -116,24 +114,6 @@ export default function Map({
       return cappedTowers;
     };
 
-    const fetchViewportTowerCount = async (bounds, network, operator) => {
-      const fetchStart = performance.now();
-      const response = await getTowerCount(bounds, { network, operator });
-      const fetchDuration = performance.now() - fetchStart;
-      const count = Number(response.data?.count ?? 0);
-
-      console.log("PERF tower_count_fetch", {
-        durationMs: Number(fetchDuration.toFixed(2)),
-        count,
-        network,
-        operator,
-      });
-
-      setTowerCount(count);
-
-      return count;
-    };
-
     const fetchViewportOperatorDistribution = async (
       bounds,
       network,
@@ -173,7 +153,6 @@ export default function Map({
     const viewportController = createViewportController({
       fetchHeatmapPoints,
       fetchTowers,
-      fetchTowerCount: fetchViewportTowerCount,
       fetchOperatorDistribution: fetchViewportOperatorDistribution,
       debounceMs: FETCH_DEBOUNCE_MS,
       onData: ({ mode, data }) => {
@@ -220,14 +199,24 @@ export default function Map({
 
       if (isMaxZoomTowerView) {
         try {
-          towerLimit = await viewportController.debouncedFetchTowerCount(
+          const operators = await viewportController.debouncedFetchOperatorDistribution(
             bounds,
             network,
             operator,
           );
+
+          const totalFromOperators = Array.isArray(operators)
+            ? operators.reduce((sum, op) => sum + Number(op.tower_count ?? 0), 0)
+            : 0;
+
+          if (totalFromOperators > 0) {
+            towerLimit = totalFromOperators;
+          } else {
+            towerLimit = MAX_RAW_TOWERS;
+          }
         } catch (error) {
           if (error?.name !== "CanceledError") {
-            console.log("Error fetching max-zoom tower count:", error);
+            console.log("Error fetching operator distribution for towerLimit:", error);
           }
         }
       }
@@ -242,21 +231,13 @@ export default function Map({
 
       if (!isMaxZoomTowerView) {
         viewportController
-          .debouncedFetchTowerCount(bounds, network, operator)
+          .debouncedFetchOperatorDistribution(bounds, network, operator)
           .catch((error) => {
             if (error?.name !== "CanceledError") {
-              console.log("Error fetching tower count:", error);
+              console.log("Error fetching operator distribution:", error);
             }
           });
       }
-
-      viewportController
-        .debouncedFetchOperatorDistribution(bounds, network, operator)
-        .catch((error) => {
-          if (error?.name !== "CanceledError") {
-            console.log("Error fetching operator distribution:", error);
-          }
-        });
     };
 
     const syncCenterToDashboard = () => {
@@ -302,7 +283,7 @@ export default function Map({
       removeGeoJSONLayerResources(map, HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID);
       removeGeoJSONLayerResources(map, RAW_TOWER_SOURCE_ID, RAW_TOWER_LAYER_ID);
     };
-  }, [setMapCenter, setTowerCount, setOperatorDistribution]);
+  }, [setMapCenter, setOperatorDistribution]);
 
   return (
     <div
