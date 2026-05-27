@@ -69,13 +69,13 @@ export default function Map({
       });
       const fetchDuration = performance.now() - fetchStart;
 
-      console.log("PERF heatmap_fetch", {
-        durationMs: Number(fetchDuration.toFixed(2)),
-        pointCount: response.data.length,
-        zoom,
-        network,
-        operator,
-      });
+      // console.log("PERF heatmap_fetch", {
+      //   durationMs: Number(fetchDuration.toFixed(2)),
+      //   pointCount: response.data.length,
+      //   zoom,
+      //   network,
+      //   operator,
+      // });
 
       return response.data;
     };
@@ -103,15 +103,15 @@ export default function Map({
         : [];
       const cappedTowers = towers.slice(0, requestedLimit);
 
-      console.log("PERF raw_fetch", {
-        durationMs: Number(fetchDuration.toFixed(2)),
-        returnedCount: towers.length,
-        renderedCount: cappedTowers.length,
-        zoom,
-        requestedLimit,
-        network,
-        operator,
-      });
+      // console.log("PERF raw_fetch", {
+      //   durationMs: Number(fetchDuration.toFixed(2)),
+      //   returnedCount: towers.length,
+      //   renderedCount: cappedTowers.length,
+      //   zoom,
+      //   requestedLimit,
+      //   network,
+      //   operator,
+      // });
 
       return cappedTowers;
     };
@@ -131,12 +131,12 @@ export default function Map({
         ? response.data.operators
         : [];
 
-      console.log("PERF operator_distribution_fetch", {
-        durationMs: Number(fetchDuration.toFixed(2)),
-        operatorCount: operators.length,
-        network,
-        operator,
-      });
+      // console.log("PERF operator_distribution_fetch", {
+      //   durationMs: Number(fetchDuration.toFixed(2)),
+      //   operatorCount: operators.length,
+      //   network,
+      //   operator,
+      // });
 
       setOperatorDistribution(operators);
 
@@ -270,7 +270,7 @@ export default function Map({
     requestViewportDataRef.current = requestViewportData;
 
     const handleMapLoad = () => {
-      console.log("ZOOM: ", map.getZoom());
+      // console.log("ZOOM: ", map.getZoom());
       renderState.mapReady = true;
 
       renderMap({
@@ -284,7 +284,7 @@ export default function Map({
     };
 
     const handleMoveEnd = () => {
-      console.log("ZOOM: ", map.getZoom());
+      // console.log("ZOOM: ", map.getZoom());
       requestViewportData();
 
       syncDashboard();
