@@ -34,8 +34,8 @@ def get_towers(
             ct.radio,
             ct.mcc,
             ct.mnc,
-            ct.latitude,
-            ct.longitude,
+            ST_Y(ct.location)::float AS latitude,
+            ST_X(ct.location)::float AS longitude,
             ct.range,
             ct.operator_name
         FROM cell_towers ct
@@ -162,8 +162,8 @@ def get_heatmap_points(
 
     query = text(f"""
         SELECT
-            ct.latitude::float AS latitude,
-            ct.longitude::float AS longitude
+            ST_Y(ct.location)::float AS latitude,
+            ST_X(ct.location)::float AS longitude
         FROM cell_towers ct
         WHERE ct.location && ST_MakeEnvelope(
                 :min_lon,
