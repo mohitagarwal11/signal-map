@@ -4,8 +4,9 @@ from sqlalchemy import create_engine, text
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("NEON_CONNECTION_STRING")
-# print("DB URL:", DATABASE_URL)  # add this
+DATABASE_URL = os.getenv("NEON_CONNECTION_STRING") or os.getenv(
+    "DOCKER_CONNECTION_STRING"
+)
 
 engine = create_engine(DATABASE_URL)
 

@@ -6,8 +6,7 @@
   "scripts": {
     "docker": "docker exec -it signal_map psql -U maw11 -d signal_map",
     "start": "fastapi run src/main.py",
-    "dev": "fastapi dev src/main.py",
-    "generate:initial-clusters": "python src/scripts/generate_initial_clusters.py"
+    "dev": "fastapi dev src/main.py"
   },
   "keywords": [],
   "author": "",

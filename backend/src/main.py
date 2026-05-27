@@ -1,14 +1,21 @@
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from routes.towers_routes import router as towers_router
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
 app = FastAPI()
-
+load_dotenv()
 
 origins = [
     "http://localhost:5173",
 ]
+
+frontend_url = os.getenv("FRONTEND_URL")
+
+if frontend_url:
+    origins.append(frontend_url)
 
 app.add_middleware(
     CORSMiddleware,

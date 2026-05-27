@@ -1,6 +1,3 @@
-import logging
-import time
-
 from fastapi import APIRouter
 from controllers.towers_controller import (
     get_tower_count,
@@ -10,7 +7,6 @@ from controllers.towers_controller import (
 )
 
 router = APIRouter()
-logger = logging.getLogger(__name__)
 
 
 @router.get("/")
