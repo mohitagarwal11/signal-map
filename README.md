@@ -1,8 +1,22 @@
-# Signal Map
+# Signal-M
 
 Interactive map for exploring cellular tower data — heatmaps, per-operator filters, and network recommendations based on your current viewport.
 
 Live: [signal-map-beryl.vercel.app](https://signal-map-beryl.vercel.app/)
+
+## Screenshots
+
+### Dashboard Overview
+
+![Dashboard overview](./assets/Dashboard.png)
+
+### Heatmap zoomed Overview
+
+![Heatmap zoomed overview](./assets/Heatmap%20zoom.png)
+
+### Tower zoomed Overview
+
+![Tower zoomed overview](./assets/Tower%20zoom.png)
 
 ## Stack
 
