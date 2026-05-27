@@ -37,7 +37,6 @@ def get_towers(
             ct.latitude,
             ct.longitude,
             ct.range,
-            ct.avg_signal,
             ct.operator_name
         FROM cell_towers ct
         WHERE ct.location && ST_MakeEnvelope(
@@ -168,10 +167,7 @@ def get_heatmap_points(
             ct.longitude::float AS longitude
         FROM cell_towers ct
         TABLESAMPLE SYSTEM(:sample_pct)
-        WHERE ct.location IS NOT NULL
-            AND ct.latitude IS NOT NULL
-            AND ct.longitude IS NOT NULL
-            AND ct.location && ST_MakeEnvelope(
+        WHERE ct.location && ST_MakeEnvelope(
                 :min_lon,
                 :min_lat,
                 :max_lon,
