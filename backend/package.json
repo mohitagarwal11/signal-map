@@ -4,9 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "docker": "docker exec -it signal_map psql -U maw11 -d signal_map",
-    "start": "fastapi run src/main.py",
-    "dev": "fastapi dev src/main.py"
+    "docker": "docker exec -it signal_map psql -U maw11 -d signal_map"
   },
   "keywords": [],
   "author": "",

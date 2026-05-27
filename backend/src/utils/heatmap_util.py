@@ -1,4 +1,4 @@
-from utils.validation_util import _to_finite_float
+from src.utils.validation_util import _to_finite_float
 
 HEATMAP_MAX_POINTS = 18_000
 

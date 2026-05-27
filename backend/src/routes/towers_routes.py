@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from controllers.towers_controller import (
+from src.controllers.towers_controller import (
     get_tower_count,
     get_towers,
     get_heatmap_points,
