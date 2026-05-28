@@ -317,8 +317,15 @@ export default function Map({
       });
 
       syncDashboard();
+    };
 
-      requestViewportData();
+    let initialFetchDone = false;
+
+    const handleIdle = () => {
+      if (!initialFetchDone) {
+        initialFetchDone = true;
+        requestViewportData();
+      }
     };
 
     const handleMoveEnd = () => {
@@ -329,6 +336,7 @@ export default function Map({
     };
 
     map.on("load", handleMapLoad);
+    map.on("idle", handleIdle);
     map.on("moveend", handleMoveEnd);
 
     return () => {
@@ -336,11 +344,17 @@ export default function Map({
       requestViewportDataRef.current = null;
       mapRef.current = null;
       map.off("load", handleMapLoad);
+      map.off("idle", handleIdle);
       map.off("moveend", handleMoveEnd);
       removeGeoJSONLayerResources(map, HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID);
       removeGeoJSONLayerResources(map, RAW_TOWER_SOURCE_ID, RAW_TOWER_LAYER_ID);
     };
-  }, []);
+  }, [
+    setAreaKm2,
+    setMapCenter,
+    setNetworkDistribution,
+    setOperatorDistribution,
+  ]);
 
   return (
     <div

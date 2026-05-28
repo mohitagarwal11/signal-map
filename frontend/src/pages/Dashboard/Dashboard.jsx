@@ -35,8 +35,6 @@ export default function Dashboard() {
 
   const [areaKm2, setAreaKm2] = useState(null);
 
-  const [infrastructureScore, setInfrastructureScore] = useState(null);
-
   const operatorOptions = [
     { value: "all", label: "All Operators" },
     { value: "Aircel", label: "Aircel" },
@@ -75,7 +73,6 @@ export default function Dashboard() {
   const {
     operatorDistributionTotal,
     operatorDistributionRowsWithShare,
-    topOperator,
     recommendedOperatorName,
     recommendedAvailability,
     densityPerKm2,
@@ -113,23 +110,14 @@ export default function Dashboard() {
     };
   }, []);
 
-  useEffect(() => {
-    if (areaKm2 != null) {
-      const score = getInfrastructureScore(
-        operatorDistributionTotal,
-        networkDistribution,
-        operatorDistribution,
-      );
-      setInfrastructureScore(score);
-    } else {
-      setInfrastructureScore(null);
-    }
-  }, [
-    areaKm2,
-    operatorDistributionTotal,
-    networkDistribution,
-    operatorDistribution,
-  ]);
+  const infrastructureScore =
+    areaKm2 == null
+      ? null
+      : getInfrastructureScore(
+          operatorDistributionTotal,
+          networkDistribution,
+          operatorDistribution,
+        );
 
   return (
     <div className="dashboard">

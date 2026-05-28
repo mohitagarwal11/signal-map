@@ -37,7 +37,6 @@ export function createViewportController(config) {
 
   let debounceTimer = null;
   let activeRequest = null;
-  let requestId = 0;
   const viewportCache = createViewportCache();
   const inFlightRequests = new Map();
 
@@ -144,7 +143,6 @@ export function createViewportController(config) {
 
     if (viewportCache.has(cacheKey)) {
       // console.log("CACHE HIT", cacheKey);
-      requestId += 1;
       cancelActiveRequest();
       onData({
         mode,
@@ -158,15 +156,8 @@ export function createViewportController(config) {
     if (inFlightRequests.has(cacheKey)) {
       console.log("REQUEST REUSED", cacheKey);
 
-      const currentRequestId = requestId + 1;
-      requestId = currentRequestId;
-
       try {
         const data = await inFlightRequests.get(cacheKey);
-
-        if (currentRequestId !== requestId) {
-          return;
-        }
 
         onData({
           mode,
@@ -184,10 +175,8 @@ export function createViewportController(config) {
     cancelActiveRequest();
 
     const controller = new AbortController();
-    const currentRequestId = requestId + 1;
 
     activeRequest = controller;
-    requestId = currentRequestId;
 
     const requestPromise = fetchViewportData({
       bounds,
@@ -210,7 +199,7 @@ export function createViewportController(config) {
     try {
       const data = await requestPromise;
 
-      if (controller.signal.aborted || currentRequestId !== requestId) {
+      if (controller.signal.aborted) {
         return;
       }
 
