@@ -1,15 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { RefreshIcon, XIcon } from "../../assets/Icons.jsx";
 import "./MapBanner.css";
 
 export default function MapBanner() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    if (!localStorage.getItem("map_banner_dismissed")) {
-      setVisible(true);
-    }
-  }, []);
+  const [visible, setVisible] = useState(
+    () => !localStorage.getItem("map_banner_dismissed")
+  );
 
   const dismiss = () => {
     localStorage.setItem("map_banner_dismissed", "1");

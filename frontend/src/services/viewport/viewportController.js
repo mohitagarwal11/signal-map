@@ -148,7 +148,7 @@ export function createViewportController(config) {
       return;
     }
 
-    console.log("CACHE MISS", cacheKey);
+    // console.log("CACHE MISS", cacheKey);
 
     if (inFlightRequests.has(cacheKey)) {
       console.log("REQUEST REUSED", cacheKey);

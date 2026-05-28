@@ -61,13 +61,13 @@ export default function Map({
       network,
       operator,
     }) => {
-      const fetchStart = performance.now();
+      // const fetchStart = performance.now();
       const response = await getHeatmapPoints(bounds, zoom, {
         signal,
         network,
         operator,
       });
-      const fetchDuration = performance.now() - fetchStart;
+      // const fetchDuration = performance.now() - fetchStart;
 
       // console.log("PERF heatmap_fetch", {
       //   durationMs: Number(fetchDuration.toFixed(2)),
@@ -82,13 +82,13 @@ export default function Map({
 
     const fetchTowers = async ({
       bounds,
-      zoom,
+      // zoom,
       towerLimit,
       signal,
       network,
       operator,
     }) => {
-      const fetchStart = performance.now();
+      // const fetchStart = performance.now();
       const requestedLimit = Number.isFinite(towerLimit)
         ? towerLimit
         : MAX_RAW_TOWERS;
@@ -97,7 +97,7 @@ export default function Map({
         network,
         operator,
       });
-      const fetchDuration = performance.now() - fetchStart;
+      // const fetchDuration = performance.now() - fetchStart;
       const towers = Array.isArray(response.data.data)
         ? response.data.data
         : [];
@@ -121,12 +121,12 @@ export default function Map({
       network,
       operator,
     ) => {
-      const fetchStart = performance.now();
+      // const fetchStart = performance.now();
       const response = await getOperatorDistribution(bounds, {
         network,
         operator,
       });
-      const fetchDuration = performance.now() - fetchStart;
+      // const fetchDuration = performance.now() - fetchStart;
       const operators = Array.isArray(response.data?.operators)
         ? response.data.operators
         : [];
@@ -302,7 +302,7 @@ export default function Map({
       removeGeoJSONLayerResources(map, HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID);
       removeGeoJSONLayerResources(map, RAW_TOWER_SOURCE_ID, RAW_TOWER_LAYER_ID);
     };
-  }, [setMapCenter, setOperatorDistribution]);
+  }, []);
 
   return (
     <div
