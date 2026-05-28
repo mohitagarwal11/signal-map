@@ -1,4 +1,4 @@
-from src.utils.heatmap_util import get_heatmap_point_limit
+from src.utils.heatmap_util import get_heatmap_point_limit, get_sample_rate
 from src.utils.operator_util import _build_operator_filter_clause
 from src.utils.radio_util import _build_radio_filter_clause
 from src.utils.validation_util import _validate_bounds
@@ -166,14 +166,15 @@ def get_heatmap_points(
             ST_X(ct.location)::float AS longitude
         FROM cell_towers ct
         WHERE ct.location && ST_MakeEnvelope(
-                :min_lon,
-                :min_lat,
-                :max_lon,
-                :max_lat,
-                4326
-            )::geometry
-            {radio_filter_clause}
-            {operator_filter_clause}
+            :min_lon,
+            :min_lat,
+            :max_lon,
+            :max_lat,
+            4326
+        )::geometry
+        {radio_filter_clause}
+        {operator_filter_clause}
+        AND random() < (1.0 / :sample_rate)
         LIMIT :limit
     """)
 
@@ -183,6 +184,7 @@ def get_heatmap_points(
         "min_lon": min_lon,
         "max_lon": max_lon,
         "limit": point_limit,
+        "sample_rate": get_sample_rate(zoom),
         **radio_params,
         **operator_params,
     }

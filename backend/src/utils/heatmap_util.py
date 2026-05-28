@@ -2,7 +2,6 @@ from src.utils.validation_util import _to_finite_float
 
 HEATMAP_MAX_POINTS = 18_000
 
-
 HEATMAP_POINT_LIMIT_STEPS = (
     (6, 3_000),
     (8, 5_000),
@@ -29,3 +28,15 @@ def get_heatmap_point_limit(zoom):
         HEATMAP_POINT_LIMIT_STEPS,
         HEATMAP_MAX_POINTS,
     )
+
+
+def get_sample_rate(zoom):
+    if zoom < 5:
+        return 20
+    if zoom < 7:
+        return 10
+    if zoom < 9:
+        return 5
+    if zoom < 11:
+        return 2
+    return 1
