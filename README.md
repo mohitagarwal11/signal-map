@@ -1,6 +1,7 @@
 # Signal-M
 
-Interactive map for exploring cellular tower data — heatmaps, per-operator filters, and network recommendations based on your current viewport.
+Going somewhere and have no idea which cell operator will actually work there?
+I had the same issue, so I built Signal Map — an interactive map that visualizes cellular tower data across India.
 
 Live: [signal-map-beryl.vercel.app](https://signal-map-beryl.vercel.app/)
 
@@ -44,19 +45,6 @@ Latency stays acceptable even on large viewports because the spatial index does 
 - Viewport stats — tower count, per-operator coverage percentages, area (km2), and tower density (towers/km2) for the current viewport.
 - Viewport-optimized fetching — limits API calls during map interaction.
 - Coming soon: infrastructure scoring and more.
-
-## Project Structure
-
-```
-backend/
-  routes/towers_routes.py       # API route definitions
-  controllers/towers_controller.py
-frontend/src/
-  api/towers.api.js             # Client-side API functions
-  map/                          # Map config and rendering logic
-  map/layers/                   # Heatmap and raw tower layer definitions
-  services/viewport/            # Viewport handling and fetch optimization
-```
 
 ## Running Locally
 
