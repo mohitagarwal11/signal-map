@@ -163,9 +163,9 @@
 
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--panel-width);
-  height: 100%;
 
   min-height: 0;
+  overflow: hidden;
 }
 
 /* ═══════ MAP AREA ═══════ */
@@ -329,16 +329,29 @@
 
   height: 100%;
   max-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
 
   min-height: 0;
 
-  padding: var(--panel-padding);
+  position: relative;
+}
 
+.dash-panel-scroll {
+  position: absolute;
+  inset: 0;
+  padding: var(--panel-padding);
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: var(--panel-gap);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.dash-panel-scroll > * {
+  flex-shrink: 0;
 }
 
 /* panel header */
@@ -388,7 +401,7 @@
   padding: var(--panel-padding);
 }
 
-/* connectivity score */
+/* infrastructure score */
 .dash-score-card {
   background: white;
   border: 1px solid var(--border);
@@ -397,7 +410,7 @@
 
   display: flex;
   flex-direction: column;
-  gap: clamp(10px, 1vw, 14px);
+  /* gap: clamp(10px, 1vw, 14px); */
 }
 
 .dash-score-header {
@@ -413,16 +426,15 @@
 }
 
 .dash-score-label {
-  font-size: clamp(10px, 0.9vw, 11px);
+  font-size: clamp(10px, 0.8vw, 12px);
   font-weight: 700;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
 }
 
 .dash-score-body {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 12px;
 }
 
 .dash-score-value {
@@ -432,10 +444,16 @@
   letter-spacing: -0.5px;
 }
 
+.dash-score-num {
+  font-size: clamp(20px, 1.5vw, 26px);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
 .dash-score-denom {
-  font-size: clamp(14px, 1.2vw, 18px);
-  font-weight: 400;
-  color: var(--text-muted);
+  font-size: clamp(16px, 1vw, 18px);
+  font-weight: 500;
+  color: var(--text-secondary);
   margin-left: 4px;
 }
 
@@ -468,7 +486,7 @@
 
 /* recommended service */
 .dash-rec-label {
-  font-size: clamp(9px, 0.8vw, 10px);
+  font-size: clamp(10px, 0.8vw, 12px);
   font-weight: 700;
   color: var(--text-muted);
   letter-spacing: 0.6px;
@@ -477,7 +495,7 @@
 .dash-rec-body {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 0.9vw, 12px);
+  gap: clamp(10px, 0.9vw, 12px);
 }
 
 .dash-rec-info {
@@ -488,7 +506,7 @@
 }
 
 .dash-rec-name {
-  font-size: clamp(16px, 1.5vw, 20px);
+  font-size: clamp(18px, 1.5vw, 20px);
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -599,10 +617,20 @@
   .dash-body {
     grid-template-columns: 1fr;
     height: auto;
+    overflow: visible;
   }
 
   .dash-panel {
     border-left: none;
     border-top: 1px solid #dce3ec;
+    position: static;
+    overflow: visible;
+  }
+
+  .dash-panel-scroll {
+    position: static;
+    height: auto;
+    inset: auto;
+    max-height: none;
   }
 }

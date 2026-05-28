@@ -250,3 +250,65 @@ def get_operator_distribution(
         results = [dict(row) for row in conn.execute(query, params).mappings()]
 
     return {"operators": results}
+
+
+def get_network_distribution(
+    min_lat,
+    max_lat,
+    min_lon,
+    max_lon,
+    network="all",
+    operator="all",
+):
+    min_lat, max_lat, min_lon, max_lon = _validate_bounds(
+        min_lat,
+        max_lat,
+        min_lon,
+        max_lon,
+    )
+
+    radio_filter_clause, radio_params = _build_radio_filter_clause(
+        "ct",
+        network,
+    )
+
+    operator_filter_clause, operator_params = _build_operator_filter_clause(
+        "ct",
+        operator,
+    )
+
+    query = text(f"""
+        SELECT
+            ct.radio,
+            COUNT(*) AS tower_count
+        FROM cell_towers ct
+        WHERE ct.location && ST_MakeEnvelope(
+            :min_lon,
+            :min_lat,
+            :max_lon,
+            :max_lat,
+            4326
+        )::geometry
+        AND ct.radio IS NOT NULL
+        {radio_filter_clause}
+        {operator_filter_clause}
+        GROUP BY ct.radio
+        ORDER BY tower_count DESC
+    """)
+
+    params = {
+        "min_lat": min_lat,
+        "max_lat": max_lat,
+        "min_lon": min_lon,
+        "max_lon": max_lon,
+        **radio_params,
+        **operator_params,
+    }
+
+    with engine.connect() as conn:
+        results = [
+            {"radio": row["radio"], "tower_count": row["tower_count"]}
+            for row in conn.execute(query, params).mappings()
+        ]
+
+    return {"networks": results}

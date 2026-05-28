@@ -86,3 +86,24 @@ export const getOperatorDistribution = async (bounds, options = {}) => {
     throw error;
   }
 };
+
+export const getNetworkDistribution = async (bounds, options = {}) => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/towers/network`, {
+      signal: options.signal,
+      params: {
+        min_lat: bounds.min_lat,
+        max_lat: bounds.max_lat,
+        min_lon: bounds.min_lon,
+        max_lon: bounds.max_lon,
+        network: options.network ?? "all",
+        operator: options.operator ?? "all",
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.log("Error fetching network distribution:", error);
+    throw error;
+  }
+};

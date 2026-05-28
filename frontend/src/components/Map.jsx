@@ -21,6 +21,7 @@ import {
   getTowersData,
   getHeatmapPoints,
   getOperatorDistribution,
+  getNetworkDistribution,
 } from "../api/towers.api";
 import { createViewportController } from "../services/viewport/viewportController";
 import { FETCH_DEBOUNCE_MS } from "../constants/initialViewport";
@@ -29,6 +30,7 @@ import { getAreaKm2 } from "../utils/getAreaKm2.js";
 export default function Map({
   setMapCenter,
   setOperatorDistribution,
+  setNetworkDistribution,
   selectedNetwork,
   selectedOperator,
   setAreaKm2,
@@ -143,6 +145,33 @@ export default function Map({
       return operators;
     };
 
+    const fetchViewportNetworkDistribution = async (
+      bounds,
+      network,
+      operator,
+    ) => {
+      // const fetchStart = performance.now();
+      const response = await getNetworkDistribution(bounds, {
+        network,
+        operator,
+      });
+      // const fetchDuration = performance.now() - fetchStart;
+      const networks = Array.isArray(response.data?.networks)
+        ? response.data.networks
+        : [];
+
+      // console.log("PERF network_distribution_fetch", {
+      //   durationMs: Number(fetchDuration.toFixed(2)),
+      //   networkCount: networks.length,
+      //   network,
+      //   operator,
+      // });
+
+      setNetworkDistribution(networks);
+
+      return networks;
+    };
+
     const map = new mapplsClient.Map("map", INITIAL_MAP_CONFIG);
     mapRef.current = map;
 
@@ -156,6 +185,7 @@ export default function Map({
       fetchHeatmapPoints,
       fetchTowers,
       fetchOperatorDistribution: fetchViewportOperatorDistribution,
+      fetchNetworkDistribution: fetchViewportNetworkDistribution,
       debounceMs: FETCH_DEBOUNCE_MS,
       onData: ({ mode, data }) => {
         renderState.fetchMode = mode;
@@ -229,6 +259,14 @@ export default function Map({
           }
         }
       }
+
+      viewportController
+        .debouncedFetchNetworkDistribution(bounds, network, operator)
+        .catch((error) => {
+          if (error?.name !== "CanceledError") {
+            console.log("Error fetching network distribution:", error);
+          }
+        });
 
       viewportController.handleViewportChange({
         bounds,

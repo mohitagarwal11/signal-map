@@ -9,6 +9,9 @@ import {
 } from "../../assets/Icons.jsx";
 import MapBanner from "../../components/MapBanner/MapBanner.jsx";
 import "./Dashboard.css";
+import { deriveOperatorMetrics } from "../../utils/operatorUtility";
+import { deriveNetworkMetrics } from "../../utils/networkUtility";
+import { getInfrastructureScore } from "../../utils/calculateInfrastructureScore";
 
 /* main Dashboard */
 export default function Dashboard() {
@@ -19,6 +22,7 @@ export default function Dashboard() {
   const panelHelpRef = useRef(null);
 
   const [operatorDistribution, setOperatorDistribution] = useState([]);
+  const [networkDistribution, setNetworkDistribution] = useState([]);
   const [mapCenter, setMapCenter] = useState({ lat: 0, lon: 0 });
 
   const [opDropdown, setOpDropdown] = useState(false);
@@ -30,6 +34,8 @@ export default function Dashboard() {
   const [selectedNetwork, setSelectedNetwork] = useState("all");
 
   const [areaKm2, setAreaKm2] = useState(null);
+
+  const [infrastructureScore, setInfrastructureScore] = useState(null);
 
   const operatorOptions = [
     { value: "all", label: "All Operators" },
@@ -66,48 +72,21 @@ export default function Dashboard() {
 
   const selectedOperatorLabel =
     selectedOperator === "all" ? "All Operators" : selectedOperator;
+  const {
+    operatorDistributionTotal,
+    operatorDistributionRowsWithShare,
+    topOperator,
+    recommendedOperatorName,
+    recommendedAvailability,
+    densityPerKm2,
+  } = deriveOperatorMetrics({ operatorDistribution, areaKm2 });
 
-  const operatorDistributionTotal = operatorDistribution.reduce(
-    (sum, operator) => sum + Number(operator.tower_count ?? 0),
-    0,
-  );
+  const { networkDistributionRows } = deriveNetworkMetrics({
+    networkDistribution,
+  });
 
-  const topOperatorDistribution = operatorDistribution.slice(0, 5);
-  const otherOperatorTowerCount = operatorDistribution
-    .slice(5)
-    .reduce((sum, operator) => sum + Number(operator.tower_count ?? 0), 0);
-
-  const tableRows =
-    otherOperatorTowerCount > 0
-      ? [
-          ...topOperatorDistribution,
-          { operator_name: "Others", tower_count: otherOperatorTowerCount },
-        ]
-      : topOperatorDistribution;
-
-  const getShareText = (towerCount) => {
-    if (operatorDistributionTotal <= 0) {
-      return "0.00%";
-    }
-
-    return `${(
-      (Number(towerCount ?? 0) * 100) /
-      operatorDistributionTotal
-    ).toFixed(2)}%`;
-  };
-
-  const tableRowsWithShare = tableRows.map((row) => ({
-    ...row,
-    shareText: getShareText(row.tower_count),
-  }));
-
-  const topOperator = operatorDistribution[0];
-  const recommendedOperatorName = topOperator?.operator_name;
-  const recommendedAvailability = getShareText(topOperator?.tower_count);
-  const densityPerKm2 =
-    areaKm2 && operatorDistributionTotal > 0
-      ? operatorDistributionTotal / areaKm2
-      : null;
+  // console.log("Operator Distribution: ", operatorDistribution);
+  // console.log("Network Distribution: ", networkDistribution);
 
   useEffect(() => {
     function handlePointerDown(event) {
@@ -133,6 +112,24 @@ export default function Dashboard() {
       document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, []);
+
+  useEffect(() => {
+    if (areaKm2 != null) {
+      const score = getInfrastructureScore(
+        operatorDistributionTotal,
+        networkDistribution,
+        operatorDistribution,
+      );
+      setInfrastructureScore(score);
+    } else {
+      setInfrastructureScore(null);
+    }
+  }, [
+    areaKm2,
+    operatorDistributionTotal,
+    networkDistribution,
+    operatorDistribution,
+  ]);
 
   return (
     <div className="dashboard">
@@ -229,6 +226,7 @@ export default function Dashboard() {
           <Map
             setMapCenter={setMapCenter}
             setOperatorDistribution={setOperatorDistribution}
+            setNetworkDistribution={setNetworkDistribution}
             selectedNetwork={selectedNetwork}
             selectedOperator={selectedOperator}
             setAreaKm2={setAreaKm2}
@@ -278,121 +276,151 @@ export default function Dashboard() {
 
         {/* right insight panel */}
         <aside className="dash-panel">
-          {/* header */}
-          <div
-            className="dash-panel-header"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span className="dash-badge">Live Insights</span>
-              <div ref={panelHelpRef}>
-                <button
-                  className="dash-icon-btn"
-                  type="button"
-                  aria-expanded={panelHelpOpen}
-                  aria-label="Viewport data note"
-                  onClick={() => setPanelHelpOpen((v) => !v)}
-                >
-                  <HelpIcon />
-                </button>
+          <div className="dash-panel-scroll">
+            {/* header */}
+            <div
+              className="dash-panel-header"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span className="dash-badge">Live Insights</span>
+                <div ref={panelHelpRef}>
+                  <button
+                    className="dash-icon-btn"
+                    type="button"
+                    aria-expanded={panelHelpOpen}
+                    aria-label="Viewport data note"
+                    onClick={() => setPanelHelpOpen((v) => !v)}
+                  >
+                    <HelpIcon />
+                  </button>
 
-                {panelHelpOpen && (
-                  <div className="dash-help-popover" role="note">
-                    <div className="dash-help-title">Viewport bounds</div>
-                    <p className="dash-help-body">
-                      Note: Data shown is limited to the current map viewport
-                      and may include regions outside India.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* header data */}
-          <p className="dash-panel-header">
-            Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
-          </p>
-
-          {/* recommended service */}
-          <div className="dash-card">
-            <div className="dash-rec-label">RECOMMENDED SERVICE</div>
-            <div className="dash-rec-body">
-              <div className="dash-rec-info">
-                <div className="dash-rec-name">{recommendedOperatorName}</div>
-                <div className="dash-rec-availability">
-                  {recommendedAvailability} Availability
+                  {panelHelpOpen && (
+                    <div className="dash-help-popover" role="note">
+                      <div className="dash-help-title">Viewport bounds</div>
+                      <p className="dash-help-body">
+                        Note: Data shown is limited to the current map viewport
+                        and may include regions outside India.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* infrastructure score */}
-          {/* <div className="dash-card dash-score-card">
-            <div className="dash-score-header">
-              <LinkIcon />
-              <span className="dash-score-label"> INFRASTRUCTURE SCORE</span>
-            </div>
-            <div className="dash-score-body">
-              <div className="dash-score-value">
-                <span className="dash-score-denom">/100</span>
+            {/* header data */}
+            <p className="dash-panel-header">
+              Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
+            </p>
+
+            {/* recommended service */}
+            <div className="dash-card">
+              <div className="dash-rec-label">RECOMMENDED SERVICE</div>
+              <div className="dash-rec-body">
+                <div className="dash-rec-info">
+                  <div className="dash-rec-name">{recommendedOperatorName}</div>
+                  <div className="dash-rec-availability">
+                    {recommendedAvailability} Availability
+                  </div>
+                </div>
               </div>
-              <span
+            </div>
+
+            {/* infrastructure score */}
+            <div className="dash-card dash-score-card">
+              <div className="dash-score-header">
+                <LinkIcon />
+                <span className="dash-score-label">INFRASTRUCTURE SCORE</span>
+              </div>
+              <div className="dash-score-body">
+                <div className="dash-score-value">
+                  <span className="dash-score-num">
+                    {infrastructureScore !== null
+                      ? infrastructureScore.toFixed(2)
+                      : "-"}
+                  </span>
+                  <span className="dash-score-denom">/100</span>
+                </div>
+                {/* <span
                 className={`dash-score-badge ${panelData.scoreLabel.toLowerCase()}`}
               >
                 {panelData.scoreLabel}
-              </span>
+              </span> */}
+              </div>
             </div>
-          </div> */}
 
-          {/* stats grid */}
-          <div className="dash-stats-grid">
-            <Card
-              header="Tower Count"
-              value={operatorDistributionTotal.toLocaleString("en-IN")}
-            />
-            <Card
-              header="Area Km²"
-              value={
-                areaKm2 == null
-                  ? "-"
-                  : `${areaKm2.toLocaleString("en-IN", {
-                      maximumFractionDigits: 2,
-                      minimumFractionDigits: 0,
-                    })}`
-              }
-            />
-            <Card
-              header="Density (towers/km²)"
-              value={densityPerKm2 == null ? "-" : densityPerKm2.toFixed(2)}
-            />
-          </div>
+            {/* stats grid */}
+            <div className="dash-stats-grid">
+              <Card
+                header="Tower Count"
+                value={operatorDistributionTotal.toLocaleString("en-IN")}
+              />
+              <Card
+                header="Area Km²"
+                value={
+                  areaKm2 == null
+                    ? "-"
+                    : `${areaKm2.toLocaleString("en-IN", {
+                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 0,
+                      })}`
+                }
+              />
+              <Card
+                header="Density (towers/km²)"
+                value={densityPerKm2 == null ? "-" : densityPerKm2.toFixed(2)}
+              />
+            </div>
 
-          {/* operator benchmark */}
-          <div className="dash-section-label">OPERATOR DISTRIBUTION</div>
-          <div className="dash-table-wrap">
-            <table className="dash-table">
-              <thead>
-                <tr>
-                  <th>OPERATOR</th>
-                  <th>TOWER COUNT</th>
-                  <th>%.SHARE</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tableRowsWithShare.map((b) => (
-                  <tr key={b.operator_name}>
-                    <td className="dash-td-carrier">{b.operator_name}</td>
-                    <td>{Number(b.tower_count).toLocaleString("en-IN")}</td>
-                    <td>{b.shareText}</td>
+            {/* operator distribution */}
+            <div className="dash-section-label">OPERATOR DISTRIBUTION</div>
+            <div className="dash-table-wrap">
+              <table className="dash-table">
+                <thead>
+                  <tr>
+                    <th>OPERATOR</th>
+                    <th>TOWER COUNT</th>
+                    <th>%.SHARE</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {operatorDistributionRowsWithShare.map((b) => (
+                    <tr key={b.operator_name}>
+                      <td className="dash-td-carrier">{b.operator_name}</td>
+                      <td>{Number(b.tower_count).toLocaleString("en-IN")}</td>
+                      <td>{b.shareText}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* network distribution */}
+            <div className="dash-section-label">NETWORK DISTRIBUTION</div>
+            <div className="dash-table-wrap">
+              <table className="dash-table">
+                <thead>
+                  <tr>
+                    <th>NETWORK</th>
+                    <th>TOWER COUNT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {networkDistributionRows.map((network) => (
+                    <tr key={network.radio}>
+                      <td className="dash-td-carrier">{network.radio}</td>
+                      <td>
+                        {Number(network.tower_count).toLocaleString("en-IN")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </aside>
       </div>

@@ -30,6 +30,7 @@ export function createViewportController(config) {
     fetchHeatmapPoints,
     fetchTowers,
     fetchOperatorDistribution,
+    fetchNetworkDistribution,
     onData,
     debounceMs = FETCH_DEBOUNCE_MS,
   } = config;
@@ -47,6 +48,10 @@ export function createViewportController(config) {
 
   const debouncedFetchOperatorDistribution = debounceAsync(
     fetchOperatorDistribution,
+    debounceMs,
+  );
+  const debouncedFetchNetworkDistribution = debounceAsync(
+    fetchNetworkDistribution,
     debounceMs,
   );
 
@@ -138,7 +143,7 @@ export function createViewportController(config) {
     }
 
     if (viewportCache.has(cacheKey)) {
-      console.log("CACHE HIT", cacheKey);
+      // console.log("CACHE HIT", cacheKey);
       requestId += 1;
       cancelActiveRequest();
       onData({
@@ -264,6 +269,7 @@ export function createViewportController(config) {
   return {
     handleViewportChange,
     debouncedFetchOperatorDistribution,
+    debouncedFetchNetworkDistribution,
     hydrateViewport,
     destroy,
   };
