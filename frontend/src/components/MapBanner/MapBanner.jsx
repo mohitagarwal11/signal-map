@@ -4,7 +4,7 @@ import "./MapBanner.css";
 
 export default function MapBanner() {
   const [visible, setVisible] = useState(
-    () => !localStorage.getItem("map_banner_dismissed")
+    () => !localStorage.getItem("map_banner_dismissed"),
   );
 
   const dismiss = () => {
@@ -22,7 +22,7 @@ export default function MapBanner() {
   return (
     <div className="dash-map-banner">
       <span>
-        Map/Heatmap not loading? Try refreshing and zooming in and out.
+        First load may take upto 30 seconds, free tier servers are waking up.
       </span>
       <button onClick={refresh} className="dash-map-banner-refresh">
         <RefreshIcon /> Refresh

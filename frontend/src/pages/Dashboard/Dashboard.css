@@ -367,12 +367,12 @@
 }
 
 .dash-badge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  padding: clamp(3px, 0.35vw, 4px) clamp(8px, 0.9vw, 10px);
+  padding: clamp(5px, 0.35vw, 7px) clamp(8px, 0.9vw, 10px);
   background: var(--blue);
   color: #ffffff;
-  font-size: clamp(9px, 0.75vw, 10px);
+  font-size: clamp(12px, 0.75vw, 16px);
   font-weight: 800;
   letter-spacing: 0.8px;
   border-radius: var(--radius-sm);

@@ -274,9 +274,16 @@ export default function Dashboard() {
                 justifyContent: "space-between",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span className="dash-badge">Live Insights</span>
-                <div ref={panelHelpRef}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  justifyContent: "center",
+                }}
+              >
+                <span className="dash-badge">Viewport Insights</span>
+                {/* <div ref={panelHelpRef}>
                   <button
                     className="dash-icon-btn"
                     type="button"
@@ -296,7 +303,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                   )}
-                </div>
+                </div> */}
               </div>
             </div>
 
