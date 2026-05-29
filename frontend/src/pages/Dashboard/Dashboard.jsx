@@ -281,7 +281,7 @@ export default function Dashboard() {
 
             {/* header data */}
             <div style={{}}>
-              <div className="dash-display-name">Malda, West bengal</div>
+              {/* <div className="dash-display-name">{displayName}</div> */}
               <p className="dash-display-location">
                 Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
               </p>
