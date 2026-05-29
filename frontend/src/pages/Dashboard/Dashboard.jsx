@@ -6,7 +6,7 @@ import {
   LinkIcon,
   // MoonIcon,
   HelpIcon,
-  SearchIcon,
+  // SearchIcon,
 } from "../../assets/Icons.jsx";
 import MapBanner from "../../components/MapBanner/MapBanner.jsx";
 import "./Dashboard.css";
@@ -25,7 +25,7 @@ export default function Dashboard() {
 
   const [selectedOperator, setSelectedOperator] = useState("all");
   const [selectedNetwork, setSelectedNetwork] = useState("all");
-  const [searchVal, setSearchVal] = useState("");
+  // const [searchVal, setSearchVal] = useState("");
 
   const [areaKm2, setAreaKm2] = useState(null);
   const [panelHelpOpen, setpanelHelpOpen] = useState(false);
@@ -147,7 +147,7 @@ export default function Dashboard() {
         <div className="dash-map-area">
           <MapBanner />
           {/* search + filters overlay */}
-          <div className="dash-map-overlay-left">
+          {/* <div className="dash-map-overlay-left">
             <div className="dash-search-box">
               <SearchIcon />
               <input
@@ -157,7 +157,7 @@ export default function Dashboard() {
                 onChange={(e) => setSearchVal(e.target.value)}
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="dash-map-overlay-right">
             <div className="dash-dropdown-wrap" ref={operatorWrapRef}>
