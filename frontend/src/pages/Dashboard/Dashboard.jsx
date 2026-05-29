@@ -252,30 +252,31 @@ export default function Dashboard() {
                 }}
               >
                 <span className="dash-badge">Viewport Insights</span>
-                {/* panel help button */}
-                <button
-                  className="dash-icon-btn dash-panel-help-btn"
-                  type="button"
-                  aria-expanded={panelHelpOpen}
-                  aria-label="About the data shown here"
-                  onClick={() => setpanelHelpOpen((value) => !value)}
-                  ref={panelHelpRef}
-                >
-                  <HelpIcon />
-                </button>
-                {panelHelpOpen && (
-                  <div className="dash-help-popover" role="note">
-                    <div className="dash-help-title">Data note</div>
-                    <p className="dash-help-body">
-                      The data shown here is raw, unfiltered tower data sourced
-                      from data.gov.in. It includes records from 2023 or earlier
-                      and has not been cleaned, verified, or updated.
-                      Discrepancies, inaccuracies or oddities in the data are to
-                      be expected. Treat this as a reference snapshot of the
-                      telecom infrastructure as it stood in or before 2023.
-                    </p>
-                  </div>
-                )}
+                <div className="dash-help-wrap" ref={panelHelpRef}>
+                  <button
+                    className="dash-icon-btn dash-panel-help-btn"
+                    type="button"
+                    aria-expanded={panelHelpOpen}
+                    aria-label="About the data shown here"
+                    onClick={() => setpanelHelpOpen((value) => !value)}
+                  >
+                    <HelpIcon />
+                  </button>
+                  {panelHelpOpen && (
+                    <div className="dash-help-popover" role="note">
+                      <div className="dash-help-title">Data note</div>
+                      <p className="dash-help-body">
+                        The data shown here is raw, unfiltered tower data
+                        sourced from data.gov.in. It includes records from 2023
+                        or earlier and has not been cleaned, verified, or
+                        updated. Discrepancies, inaccuracies or oddities in the
+                        data are to be expected. Treat this as a reference
+                        snapshot of the telecom infrastructure as it stood in or
+                        before 2023.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
