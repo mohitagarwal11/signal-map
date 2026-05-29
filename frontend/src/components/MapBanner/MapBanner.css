@@ -1,9 +1,17 @@
 .dash-map-banner {
   position: absolute;
-  top: 16px;
-  left: 30%;
+
   transform: translateX(-50%);
   z-index: 1000;
+
+  left: 50%;
+  top: 20%;
+
+  min-width: 260px;
+  max-width: 320px;
+
+  overflow-wrap: break-word;
+  word-break: normal;
 
   display: flex;
   align-items: center;
@@ -18,7 +26,6 @@
 
   font-size: 13px;
   color: #374151;
-  white-space: nowrap;
 }
 
 .dash-map-banner-refresh {
