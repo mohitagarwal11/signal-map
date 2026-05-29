@@ -11,7 +11,7 @@ import MapBanner from "../../components/MapBanner/MapBanner.jsx";
 import "./Dashboard.css";
 import { deriveOperatorMetrics } from "../../utils/operatorUtility";
 import { deriveNetworkMetrics } from "../../utils/networkUtility";
-import { getInfrastructureScore } from "../../utils/calculateInfrastructureScore";
+import { getInfrastructureScore } from "../../utils/getInfrastructureScore.js";
 
 /* main Dashboard */
 export default function Dashboard() {
@@ -110,14 +110,11 @@ export default function Dashboard() {
     };
   }, []);
 
-  const infrastructureScore =
-    areaKm2 == null
-      ? null
-      : getInfrastructureScore(
-          operatorDistributionTotal,
-          networkDistribution,
-          operatorDistribution,
-        );
+  const infrastructureScore = getInfrastructureScore(
+    operatorDistributionTotal,
+    networkDistribution,
+    operatorDistribution,
+  );
 
   return (
     <div className="dashboard">
@@ -283,31 +280,11 @@ export default function Dashboard() {
                 }}
               >
                 <span className="dash-badge">Viewport Insights</span>
-                {/* <div ref={panelHelpRef}>
-                  <button
-                    className="dash-icon-btn"
-                    type="button"
-                    aria-expanded={panelHelpOpen}
-                    aria-label="Viewport data note"
-                    onClick={() => setPanelHelpOpen((v) => !v)}
-                  >
-                    <HelpIcon />
-                  </button>
-
-                  {panelHelpOpen && (
-                    <div className="dash-help-popover" role="note">
-                      <div className="dash-help-title">Viewport bounds</div>
-                      <p className="dash-help-body">
-                        Note: Data shown is limited to the current map viewport
-                        and may include regions outside India.
-                      </p>
-                    </div>
-                  )}
-                </div> */}
               </div>
             </div>
 
             {/* header data */}
+            <div className="dash-section-label">{displayName}</div>
             <p className="dash-panel-header">
               Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
             </p>
