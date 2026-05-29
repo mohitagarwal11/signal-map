@@ -162,54 +162,16 @@
 }
 
 /* overlay controls */
-.dash-map-overlay-left,
-.dash-map-overlay-right {
+.dash-map-controls {
   position: absolute;
   top: 16px;
-  z-index: 1000;
+  right: 16px;
+
+  z-index: 500;
+
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.dash-map-overlay-left {
-  left: 16px;
-}
-
-.dash-map-overlay-right {
-  right: 16px;
-}
-
-.dash-search-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 0 14px;
-  height: 46px;
-  min-width: 245px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(8px);
-}
-
-.dash-search-box svg {
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.dash-search-box input {
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 14px;
-  color: var(--text-primary);
-  width: 100%;
-}
-
-.dash-search-box input::placeholder {
-  color: var(--text-muted);
 }
 
 /* dropdowns */
@@ -286,8 +248,8 @@
 }
 
 .dash-sheet-bar {
-  width: 36px;
-  height: 4px;
+  width: 48px;
+  height: 5px;
   background: #cbd5e1;
   border-radius: 2px;
 }
@@ -585,27 +547,14 @@
     height: 100dvh;
   }
 
-  .dash-map-overlay-left {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    width: calc(100% - 32px);
-    max-width: 400px;
-  }
-
-  .dash-map-overlay-left .dash-search-box {
-    width: 100%;
-    min-width: unset;
-  }
-
-  .dash-map-overlay-right {
+  .dash-map-controls {
     top: 74px;
     right: auto;
     left: 50%;
     transform: translateX(-50%);
   }
 
-  .dash-map-overlay-right .dash-dropdown-btn {
+  .dash-map-controls .dash-dropdown-btn {
     min-width: 140px;
     font-size: 11px;
   }
@@ -634,6 +583,8 @@
 
   .dash-sheet-handle {
     display: flex;
+    touch-action: pan-y;
+    user-select: none;
   }
 
   .dash-panel-scroll {

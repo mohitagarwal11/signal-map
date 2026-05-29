@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import Map from "../../components/Map.jsx";
 import Card from "../../components/Card/Card.jsx";
+import SearchBar from "../../components/SearchBar/SearchBar.jsx";
+import FilterDropdown from "../../components/FilterDropdown/FilterDropdown.jsx";
+import HelpPopover from "../../components/HelpPopover/HelpPopover";
 import {
   ChevronDownIcon,
   LinkIcon,
   // MoonIcon,
   HelpIcon,
-  // SearchIcon,
 } from "../../assets/Icons.jsx";
 import MapBanner from "../../components/MapBanner/MapBanner.jsx";
 import "./Dashboard.css";
@@ -14,27 +16,22 @@ import { deriveOperatorMetrics } from "../../utils/operatorUtility";
 import { deriveNetworkMetrics } from "../../utils/networkUtility";
 import { getInfrastructureScore } from "../../utils/getInfrastructureScore.js";
 
+import { header, body, footer } from "../../constants/helpData.js";
+
 /* main Dashboard */
 export default function Dashboard() {
   const [operatorDistribution, setOperatorDistribution] = useState([]);
   const [networkDistribution, setNetworkDistribution] = useState([]);
   const [mapCenter, setMapCenter] = useState({ lat: 0, lon: 0 });
 
-  const [opDropdown, setOpDropdown] = useState(false);
-  const [techDropdown, setTechDropdown] = useState(false);
-
   const [selectedOperator, setSelectedOperator] = useState("all");
   const [selectedNetwork, setSelectedNetwork] = useState("all");
-  // const [searchVal, setSearchVal] = useState("");
 
   const [areaKm2, setAreaKm2] = useState(null);
-  const [panelHelpOpen, setpanelHelpOpen] = useState(false);
 
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const panelHelpRef = useRef(null);
-  const operatorWrapRef = useRef(null);
-  const networkWrapRef = useRef(null);
+  const [flyTarget, setFlyTarget] = useState(null);
 
   const operatorOptions = [
     { value: "all", label: "All Operators" },
@@ -66,11 +63,7 @@ export default function Dashboard() {
     { value: "5G", label: "5G" },
   ];
 
-  const selectedNetworkLabel =
-    selectedNetwork === "all" ? "All Networks" : selectedNetwork;
-
-  const selectedOperatorLabel =
-    selectedOperator === "all" ? "All Operators" : selectedOperator;
+  const touchStartY = useRef(0);
 
   const {
     operatorDistributionTotal,
@@ -87,36 +80,28 @@ export default function Dashboard() {
   // console.log("Operator Distribution: ", operatorDistribution);
   // console.log("Network Distribution: ", networkDistribution);
 
-  // for handling outside clicks for dropdowns and popovers
-  useEffect(() => {
-    function handlePointerDown(event) {
-      const target = event.target;
-
-      if (
-        panelHelpRef.current?.contains(target) ||
-        operatorWrapRef.current?.contains(target) ||
-        networkWrapRef.current?.contains(target)
-      ) {
-        return;
-      }
-
-      setpanelHelpOpen(false);
-      setOpDropdown(false);
-      setTechDropdown(false);
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown);
-
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-    };
-  }, []);
-
   const infrastructureScore = getInfrastructureScore(
     operatorDistributionTotal,
     networkDistribution,
     operatorDistribution,
   );
+
+  const handleSheetTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleSheetTouchEnd = (e) => {
+    const endY = e.changedTouches[0].clientY;
+    const deltaY = endY - touchStartY.current;
+
+    if (deltaY < -50) {
+      setSheetOpen(true);
+    }
+
+    if (deltaY > 50) {
+      setSheetOpen(false);
+    }
+  };
 
   return (
     <div className="dashboard">
@@ -145,76 +130,33 @@ export default function Dashboard() {
       {/* main body */}
       <div className="dash-body">
         <div className="dash-map-area">
+          {/* the first initial msg to users */}
           <MapBanner />
-          {/* search + filters overlay */}
-          {/* <div className="dash-map-overlay-left">
-            <div className="dash-search-box">
-              <SearchIcon />
-              <input
-                type="text"
-                placeholder="Location or Pincode..."
-                value={searchVal}
-                onChange={(e) => setSearchVal(e.target.value)}
-              />
-            </div>
-          </div> */}
 
-          <div className="dash-map-overlay-right">
-            <div className="dash-dropdown-wrap" ref={operatorWrapRef}>
-              <button
-                className="dash-dropdown-btn"
-                type="button"
-                onClick={() => setOpDropdown((v) => !v)}
-              >
-                {selectedOperatorLabel}
-                <ChevronDownIcon />
-              </button>
-              {opDropdown && (
-                <div className="dash-dropdown-menu">
-                  {operatorOptions.map((operator) => (
-                    <div
-                      key={operator.value}
-                      className={`dash-dropdown-item ${selectedOperator === operator.value ? "active" : ""}`}
-                      onClick={() => {
-                        setSelectedOperator(operator.value);
-                        setOpDropdown(false);
-                      }}
-                    >
-                      {operator.label}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="dash-dropdown-wrap" ref={networkWrapRef}>
-              <button
-                className="dash-dropdown-btn"
-                type="button"
-                onClick={() => setTechDropdown((v) => !v)}
-              >
-                {selectedNetworkLabel}
-                <ChevronDownIcon />
-              </button>
-              {techDropdown && (
-                <div className="dash-dropdown-menu">
-                  {networkOptions.map((network) => (
-                    <div
-                      key={network.value}
-                      className={`dash-dropdown-item ${selectedNetwork === network.value ? "active" : ""}`}
-                      onClick={() => {
-                        setSelectedNetwork(network.value);
-                        setTechDropdown(false);
-                      }}
-                    >
-                      {network.label}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+          <SearchBar
+            onLocationSelect={(location) => {
+              setFlyTarget({
+                lat: location.lat,
+                lon: location.lon,
+              });
+            }}
+          />
+          <div className="dash-map-controls">
+            <FilterDropdown
+              value={selectedOperator}
+              options={operatorOptions}
+              defaultLabel="All Operators"
+              onChange={setSelectedOperator}
+            />
+
+            <FilterDropdown
+              value={selectedNetwork}
+              options={networkOptions}
+              defaultLabel="All Networks"
+              onChange={setSelectedNetwork}
+            />
           </div>
 
-          {/* map */}
           <Map
             setMapCenter={setMapCenter}
             setOperatorDistribution={setOperatorDistribution}
@@ -222,6 +164,7 @@ export default function Dashboard() {
             selectedNetwork={selectedNetwork}
             selectedOperator={selectedOperator}
             setAreaKm2={setAreaKm2}
+            flyTarget={flyTarget}
           />
         </div>
 
@@ -230,6 +173,8 @@ export default function Dashboard() {
           <div
             className="dash-sheet-handle"
             onClick={() => setSheetOpen((v) => !v)}
+            onTouchStart={handleSheetTouchStart}
+            onTouchEnd={handleSheetTouchEnd}
           >
             <div className="dash-sheet-bar" />
           </div>
@@ -252,31 +197,7 @@ export default function Dashboard() {
                 }}
               >
                 <span className="dash-badge">Viewport Insights</span>
-                <div className="dash-help-wrap" ref={panelHelpRef}>
-                  <button
-                    className="dash-icon-btn dash-panel-help-btn"
-                    type="button"
-                    aria-expanded={panelHelpOpen}
-                    aria-label="About the data shown here"
-                    onClick={() => setpanelHelpOpen((value) => !value)}
-                  >
-                    <HelpIcon />
-                  </button>
-                  {panelHelpOpen && (
-                    <div className="dash-help-popover" role="note">
-                      <div className="dash-help-title">Data note</div>
-                      <p className="dash-help-body">
-                        The data shown here is raw, unfiltered tower data
-                        sourced from data.gov.in. It includes records from 2023
-                        or earlier and has not been cleaned, verified, or
-                        updated. Discrepancies, inaccuracies or oddities in the
-                        data are to be expected. Treat this as a reference
-                        snapshot of the telecom infrastructure as it stood in or
-                        before 2023.
-                      </p>
-                    </div>
-                  )}
-                </div>
+                <HelpPopover header={header} body={body} footer={footer} />
               </div>
             </div>
 

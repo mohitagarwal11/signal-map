@@ -34,6 +34,7 @@ export default function Map({
   selectedNetwork,
   selectedOperator,
   setAreaKm2,
+  flyTarget,
 }) {
   const selectedNetworkRef = useRef(selectedNetwork);
   const selectedOperatorRef = useRef(selectedOperator);
@@ -355,6 +356,15 @@ export default function Map({
     setNetworkDistribution,
     setOperatorDistribution,
   ]);
+
+  useEffect(() => {
+    if (!flyTarget || !mapRef.current) return;
+
+    mapRef.current.flyTo({
+      center: [flyTarget.lon, flyTarget.lat],
+      zoom: 12,
+    });
+  }, [flyTarget]);
 
   return (
     <div
