@@ -1,0 +1,92 @@
+.search-bar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+
+  width: 320px;
+
+  z-index: 1000;
+}
+
+.search-bar-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  height: 46px;
+  padding: 0 14px;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.search-bar-input svg {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.search-bar-input input {
+  flex: 1;
+
+  border: none;
+  outline: none;
+  background: transparent;
+
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.search-bar-input input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-bar-dropdown {
+  margin-top: 6px;
+
+  background: rgba(255, 255, 255, 0.98);
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  overflow: hidden;
+
+  max-height: 260px;
+  overflow-y: auto;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.search-bar-item {
+  padding: 12px 14px;
+
+  font-size: 14px;
+  color: var(--text-primary);
+
+  cursor: pointer;
+
+  border-bottom: 1px solid rgba(203, 213, 225, 0.6);
+
+  transition: background 0.15s ease;
+}
+
+.search-bar-item:last-child {
+  border-bottom: none;
+}
+
+.search-bar-item:hover {
+  background: rgba(241, 245, 249, 0.9);
+}
+
+@media (max-width: 900px) {
+  .search-bar {
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: calc(100% - 32px);
+    max-width: 400px;
+  }
+}
