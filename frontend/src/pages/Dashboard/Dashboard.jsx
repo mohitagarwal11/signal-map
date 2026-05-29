@@ -6,6 +6,7 @@ import {
   LinkIcon,
   MoonIcon,
   HelpIcon,
+  SearchIcon,
 } from "../../assets/Icons.jsx";
 import MapBanner from "../../components/MapBanner/MapBanner.jsx";
 import "./Dashboard.css";
@@ -15,27 +16,25 @@ import { getInfrastructureScore } from "../../utils/getInfrastructureScore.js";
 
 /* main Dashboard */
 export default function Dashboard() {
-  const [statusHelpOpen, setStatusHelpOpen] = useState(false);
-  const statusHelpWrapRef = useRef(null);
-
-  const [panelHelpOpen, setPanelHelpOpen] = useState(false);
-  const panelHelpRef = useRef(null);
-
   const [operatorDistribution, setOperatorDistribution] = useState([]);
   const [networkDistribution, setNetworkDistribution] = useState([]);
   const [mapCenter, setMapCenter] = useState({ lat: 0, lon: 0 });
 
   const [opDropdown, setOpDropdown] = useState(false);
-  const operatorWrapRef = useRef(null);
-  const [selectedOperator, setSelectedOperator] = useState("all");
-
   const [techDropdown, setTechDropdown] = useState(false);
-  const networkWrapRef = useRef(null);
+
+  const [selectedOperator, setSelectedOperator] = useState("all");
   const [selectedNetwork, setSelectedNetwork] = useState("all");
+  const [searchVal, setSearchVal] = useState("");
 
   const [areaKm2, setAreaKm2] = useState(null);
+  const [panelHelpOpen, setpanelHelpOpen] = useState(false);
 
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  const panelHelpRef = useRef(null);
+  const operatorWrapRef = useRef(null);
+  const networkWrapRef = useRef(null);
 
   const operatorOptions = [
     { value: "all", label: "All Operators" },
@@ -92,15 +91,14 @@ export default function Dashboard() {
       const target = event.target;
 
       if (
-        statusHelpWrapRef.current?.contains(target) ||
+        panelHelpRef.current?.contains(target) ||
         operatorWrapRef.current?.contains(target) ||
-        networkWrapRef.current?.contains(target) ||
-        panelHelpRef.current?.contains(target)
+        networkWrapRef.current?.contains(target)
       ) {
         return;
       }
 
-      setStatusHelpOpen(false);
+      setpanelHelpOpen(false);
       setOpDropdown(false);
       setTechDropdown(false);
     }
@@ -138,9 +136,8 @@ export default function Dashboard() {
         <div className="dash-map-area">
           <MapBanner />
           {/* search + filters overlay */}
-          <div className="dash-map-overlay">
-            {/* search box */}
-            {/* <div className="dash-search-box">
+          <div className="dash-map-overlay-left">
+            <div className="dash-search-box">
               <SearchIcon />
               <input
                 type="text"
@@ -148,9 +145,11 @@ export default function Dashboard() {
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
               />
-            </div> */}
+            </div>
+          </div>
+
+          <div className="dash-map-overlay-right">
             <div className="dash-dropdown-wrap" ref={operatorWrapRef}>
-              {/* operator dropdown */}
               <button
                 className="dash-dropdown-btn"
                 type="button"
@@ -164,9 +163,7 @@ export default function Dashboard() {
                   {operatorOptions.map((operator) => (
                     <div
                       key={operator.value}
-                      className={`dash-dropdown-item ${
-                        selectedOperator === operator.value ? "active" : ""
-                      }`}
+                      className={`dash-dropdown-item ${selectedOperator === operator.value ? "active" : ""}`}
                       onClick={() => {
                         setSelectedOperator(operator.value);
                         setOpDropdown(false);
@@ -179,7 +176,6 @@ export default function Dashboard() {
               )}
             </div>
             <div className="dash-dropdown-wrap" ref={networkWrapRef}>
-              {/* network dropdown */}
               <button
                 className="dash-dropdown-btn"
                 type="button"
@@ -193,9 +189,7 @@ export default function Dashboard() {
                   {networkOptions.map((network) => (
                     <div
                       key={network.value}
-                      className={`dash-dropdown-item ${
-                        selectedNetwork === network.value ? "active" : ""
-                      }`}
+                      className={`dash-dropdown-item ${selectedNetwork === network.value ? "active" : ""}`}
                       onClick={() => {
                         setSelectedNetwork(network.value);
                         setTechDropdown(false);
@@ -220,7 +214,7 @@ export default function Dashboard() {
           />
 
           {/* status bar */}
-          <div className="dash-statusbar">
+          {/* <div className="dash-statusbar">
             <div className="dash-status-left">
               &copy; 2026 SignalM. Made by{" "}
               <a
@@ -229,36 +223,17 @@ export default function Dashboard() {
                 className="dash-status-link"
               >
                 Mohit Agarwal
+              </a>{" "}
+              using{" "}
+              <a
+                href="https://www.linkedin.com/in/agarwalmohit11/"
+                target="_blank"
+                className="dash-status-link"
+              >
+                mapmyindia
               </a>
             </div>
-            <div className="dash-status-right" ref={statusHelpWrapRef}>
-              <button
-                className="dash-icon-btn dash-status-help-btn"
-                type="button"
-                aria-expanded={statusHelpOpen}
-                aria-label="About the data shown here"
-                onClick={() => setStatusHelpOpen((value) => !value)}
-              >
-                <HelpIcon />
-              </button>
-              {statusHelpOpen && (
-                <div
-                  className="dash-help-popover dash-help-popover-status"
-                  role="note"
-                >
-                  <div className="dash-help-title">Data note</div>
-                  <p className="dash-help-body">
-                    The data shown here is raw, unfiltered tower data sourced
-                    from data.gov.in. It includes records from 2023 or earlier
-                    and has not been cleaned, verified, or updated.
-                    Discrepancies, inaccuracies or oddities in the data are to
-                    be expected. Treat this as a reference snapshot of the
-                    telecom infrastructure as it stood in or before 2023.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+          </div> */}
         </div>
 
         {/* right insight panel */}
@@ -288,6 +263,29 @@ export default function Dashboard() {
                 }}
               >
                 <span className="dash-badge">Viewport Insights</span>
+                <button
+                  className="dash-icon-btn dash-panel-help-btn"
+                  type="button"
+                  aria-expanded={panelHelpOpen}
+                  aria-label="About the data shown here"
+                  onClick={() => setpanelHelpOpen((value) => !value)}
+                  ref={panelHelpRef}
+                >
+                  <HelpIcon />
+                </button>
+                {panelHelpOpen && (
+                  <div className="dash-help-popover" role="note">
+                    <div className="dash-help-title">Data note</div>
+                    <p className="dash-help-body">
+                      The data shown here is raw, unfiltered tower data sourced
+                      from data.gov.in. It includes records from 2023 or earlier
+                      and has not been cleaned, verified, or updated.
+                      Discrepancies, inaccuracies or oddities in the data are to
+                      be expected. Treat this as a reference snapshot of the
+                      telecom infrastructure as it stood in or before 2023.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
