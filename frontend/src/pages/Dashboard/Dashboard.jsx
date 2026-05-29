@@ -4,7 +4,7 @@ import Card from "../../components/Card/Card.jsx";
 import {
   ChevronDownIcon,
   LinkIcon,
-  MoonIcon,
+  // MoonIcon,
   HelpIcon,
   SearchIcon,
 } from "../../assets/Icons.jsx";
@@ -71,6 +71,7 @@ export default function Dashboard() {
 
   const selectedOperatorLabel =
     selectedOperator === "all" ? "All Operators" : selectedOperator;
+
   const {
     operatorDistributionTotal,
     operatorDistributionRowsWithShare,
@@ -86,6 +87,7 @@ export default function Dashboard() {
   // console.log("Operator Distribution: ", operatorDistribution);
   // console.log("Network Distribution: ", networkDistribution);
 
+  // for handling outside clicks for dropdowns and popovers
   useEffect(() => {
     function handlePointerDown(event) {
       const target = event.target;
@@ -125,9 +127,18 @@ export default function Dashboard() {
           <span className="dash-topbar-left-M">M</span>
         </div>
         <div className="dash-topbar-right">
-          <button className="dash-icon-btn">
+          {/* <button className="dash-icon-btn">
             <MoonIcon />
-          </button>
+          </button> */}
+          <div>
+            Contact me{" "}
+            <a
+              href="https://www.linkedin.com/in/agarwalmohit11/"
+              target="_blank"
+            >
+              here.
+            </a>
+          </div>
         </div>
       </header>
 
@@ -212,28 +223,6 @@ export default function Dashboard() {
             selectedOperator={selectedOperator}
             setAreaKm2={setAreaKm2}
           />
-
-          {/* status bar */}
-          {/* <div className="dash-statusbar">
-            <div className="dash-status-left">
-              &copy; 2026 SignalM. Made by{" "}
-              <a
-                href="https://www.linkedin.com/in/agarwalmohit11/"
-                target="_blank"
-                className="dash-status-link"
-              >
-                Mohit Agarwal
-              </a>{" "}
-              using{" "}
-              <a
-                href="https://www.linkedin.com/in/agarwalmohit11/"
-                target="_blank"
-                className="dash-status-link"
-              >
-                mapmyindia
-              </a>
-            </div>
-          </div> */}
         </div>
 
         {/* right insight panel */}
@@ -251,18 +240,19 @@ export default function Dashboard() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
+                justifyContent: "center",
+                gap: "12px",
               }}
             >
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 8,
                   justifyContent: "center",
                 }}
               >
                 <span className="dash-badge">Viewport Insights</span>
+                {/* panel help button */}
                 <button
                   className="dash-icon-btn dash-panel-help-btn"
                   type="button"
@@ -290,10 +280,12 @@ export default function Dashboard() {
             </div>
 
             {/* header data */}
-            {/* <div className="dash-section-label">{displayName}</div> */}
-            <p className="dash-panel-header">
-              Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
-            </p>
+            <div style={{}}>
+              <div className="dash-display-name">Malda, West bengal</div>
+              <p className="dash-display-location">
+                Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
+              </p>
+            </div>
 
             {/* recommended service */}
             <div className="dash-card">
@@ -323,11 +315,6 @@ export default function Dashboard() {
                   </span>
                   <span className="dash-score-denom">/100</span>
                 </div>
-                {/* <span
-                className={`dash-score-badge ${panelData.scoreLabel.toLowerCase()}`}
-              >
-                {panelData.scoreLabel}
-              </span> */}
               </div>
             </div>
 

@@ -1,5 +1,7 @@
-
-export function deriveOperatorMetrics({ operatorDistribution = [], areaKm2 = null }) {
+export function deriveOperatorMetrics({
+  operatorDistribution = [],
+  areaKm2 = null,
+}) {
   const operatorDistributionTotal = operatorDistribution.reduce(
     (sum, operator) => sum + Number(operator.tower_count ?? 0),
     0,
@@ -29,10 +31,12 @@ export function deriveOperatorMetrics({ operatorDistribution = [], areaKm2 = nul
     ).toFixed(2)}%`;
   };
 
-  const operatorDistributionRowsWithShare = operatorDistributionRows.map((row) => ({
-    ...row,
-    shareText: getShareText(row.tower_count),
-  }));
+  const operatorDistributionRowsWithShare = operatorDistributionRows.map(
+    (row) => ({
+      ...row,
+      shareText: getShareText(row.tower_count),
+    }),
+  );
 
   const topOperator = operatorDistribution[0];
   const recommendedOperatorName = topOperator?.operator_name;

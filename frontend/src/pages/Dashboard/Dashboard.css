@@ -324,20 +324,23 @@
 }
 
 /* panel header */
-.dash-panel-header {
+.dash-display-location {
   position: relative;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+}
 
-  gap: clamp(6px, 0.7vw, 8px);
+.dash-display-name {
+  display: flex;
+  justify-content: center;
+  font-size: clamp(16px, 1.2vw, 18px);
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .dash-badge {
-  display: flex;
-  align-items: center;
   padding: clamp(5px, 0.35vw, 7px) clamp(8px, 0.9vw, 10px);
   background: var(--blue);
   color: #ffffff;
@@ -497,7 +500,7 @@
 .dash-section-label {
   display: flex;
   justify-content: center;
-  font-size: clamp(9px, 0.8vw, 10px);
+  font-size: clamp(10px, 0.8vw, 12px);
   font-weight: 700;
   color: var(--text-muted);
   letter-spacing: 0.7px;
@@ -544,26 +547,12 @@
   font-weight: 700 !important;
 }
 
-.dash-panel-header > div:first-child {
-  width: 100%;
-}
-
-.dash-panel-header > p {
-  margin: 0;
-}
-
 .dash-panel .dash-card,
 .dash-panel .dash-score-card {
   min-width: 0;
 }
 
-.dash-dropdown-btn {
-  border-color: #cbd5e1;
-}
 
-.dash-dropdown-btn:hover {
-  border-color: var(--blue);
-}
 
 @supports not (container-type: inline-size) {
   .dash-panel {
