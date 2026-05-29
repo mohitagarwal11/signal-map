@@ -306,6 +306,27 @@
   font-size: 11px;
   color: var(--text-muted);
 }
+/* this is not working */
+/* #map .maplibregl-ctrl-bottom-left,
+#map .maplibregl-ctrl-bottom-right {
+  margin-bottom: 34px;
+}
+
+.dash-sheet-handle {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.dash-sheet-bar {
+  width: 36px;
+  height: 4px;
+  background: #cbd5e1;
+  border-radius: 2px;
+} */
 
 .dash-status-help-btn {
   margin-left: 8px;
@@ -614,23 +635,54 @@
 }
 
 @media (max-width: 900px) {
+  .dashboard {
+    --peek-height: 145px;
+  }
+
   .dash-body {
     grid-template-columns: 1fr;
-    height: auto;
-    overflow: visible;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .dash-map-area {
+    height: 100dvh;
+  }
+
+  .dash-statusbar {
+    display: none;
   }
 
   .dash-panel {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    height: 85dvh;
+    max-height: 85dvh;
     border-left: none;
-    border-top: 1px solid #dce3ec;
-    position: static;
-    overflow: visible;
+    border-top: none;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(calc(100% - var(--peek-height)));
+    transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+    z-index: 900;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dash-panel.sheet-open {
+    transform: translateY(0);
+  }
+
+  .dash-sheet-handle {
+    display: flex;
   }
 
   .dash-panel-scroll {
     position: static;
-    height: auto;
-    inset: auto;
-    max-height: none;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
   }
 }

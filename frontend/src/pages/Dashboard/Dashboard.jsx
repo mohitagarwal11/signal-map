@@ -35,6 +35,8 @@ export default function Dashboard() {
 
   const [areaKm2, setAreaKm2] = useState(null);
 
+  const [sheetOpen, setSheetOpen] = useState(false);
+
   const operatorOptions = [
     { value: "all", label: "All Operators" },
     { value: "Aircel", label: "Aircel" },
@@ -260,7 +262,13 @@ export default function Dashboard() {
         </div>
 
         {/* right insight panel */}
-        <aside className="dash-panel">
+        <aside className={`dash-panel${sheetOpen ? " sheet-open" : ""}`}>
+          <div
+            className="dash-sheet-handle"
+            onClick={() => setSheetOpen((v) => !v)}
+          >
+            <div className="dash-sheet-bar" />
+          </div>
           <div className="dash-panel-scroll">
             {/* header */}
             <div
@@ -284,7 +292,7 @@ export default function Dashboard() {
             </div>
 
             {/* header data */}
-            <div className="dash-section-label">{displayName}</div>
+            {/* <div className="dash-section-label">{displayName}</div> */}
             <p className="dash-panel-header">
               Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
             </p>
