@@ -1,15 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Map from "../../components/Map.jsx";
 import Card from "../../components/Card/Card.jsx";
 import SearchBar from "../../components/SearchBar/SearchBar.jsx";
 import FilterDropdown from "../../components/FilterDropdown/FilterDropdown.jsx";
 import HelpPopover from "../../components/HelpPopover/HelpPopover";
-import {
-  ChevronDownIcon,
-  LinkIcon,
-  // MoonIcon,
-  HelpIcon,
-} from "../../assets/Icons.jsx";
+import { LinkIcon } from "../../assets/Icons.jsx";
 import MapBanner from "../../components/MapBanner/MapBanner.jsx";
 import "./Dashboard.css";
 import { deriveOperatorMetrics } from "../../utils/operatorUtility";
@@ -90,6 +85,11 @@ export default function Dashboard() {
     touchStartY.current = e.touches[0].clientY;
   };
 
+  const resetMap = () => {
+    setFlyTarget({ lat: 22.635, lon: 85.0, zoom: 4 });
+    setSelectedNetwork("all");
+    setSelectedOperator("all");
+  };
   const handleSheetTouchEnd = (e) => {
     const endY = e.changedTouches[0].clientY;
     const deltaY = endY - touchStartY.current;
@@ -107,10 +107,10 @@ export default function Dashboard() {
     <div className="dashboard">
       {/* top navigation bar */}
       <header className="dash-topbar">
-        <div className="dash-topbar-left">
+        <button className="dash-topbar-left" onClick={resetMap}>
           <span className="dash-topbar-left-signal">Signal-</span>
           <span className="dash-topbar-left-M">M</span>
-        </div>
+        </button>
         <div className="dash-topbar-right">
           {/* <button className="dash-icon-btn">
             <MoonIcon />
@@ -138,6 +138,7 @@ export default function Dashboard() {
               setFlyTarget({
                 lat: location.lat,
                 lon: location.lon,
+                zoom: 12,
               });
             }}
           />

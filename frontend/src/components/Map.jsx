@@ -362,7 +362,7 @@ export default function Map({
 
     mapRef.current.flyTo({
       center: [flyTarget.lon, flyTarget.lat],
-      zoom: 12,
+      zoom: flyTarget.zoom,
     });
   }, [flyTarget]);
 

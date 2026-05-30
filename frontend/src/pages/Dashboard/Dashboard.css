@@ -36,6 +36,8 @@
 .dash-topbar-left {
   font-size: 25px;
   font-weight: 700;
+  background: transparent;
+  border: none;
 }
 
 .dash-topbar-left-M {
