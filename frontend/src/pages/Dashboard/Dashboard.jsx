@@ -17,8 +17,7 @@ import { header, body, footer } from "../../constants/helpData.js";
 export default function Dashboard() {
   const [operatorDistribution, setOperatorDistribution] = useState([]);
   const [networkDistribution, setNetworkDistribution] = useState([]);
-  const [mapCenter, setMapCenter] = useState({ lat: 0, lon: 0 });
-
+  const [mapCenter, setMapCenter] = useState({ lat: 24.4, lon: 81.71 });
   const [selectedOperator, setSelectedOperator] = useState("all");
   const [selectedNetwork, setSelectedNetwork] = useState("all");
 
@@ -55,7 +54,8 @@ export default function Dashboard() {
     { value: "2G", label: "2G" },
     { value: "3G", label: "3G" },
     { value: "4G", label: "4G" },
-    { value: "5G", label: "5G" },
+    // { value: "5G", label: "5G" },
+    // need btr 5G data
   ];
 
   const touchStartY = useRef(0);
@@ -86,7 +86,7 @@ export default function Dashboard() {
   };
 
   const resetMap = () => {
-    setFlyTarget({ lat: 22.635, lon: 85.0, zoom: 4 });
+    setFlyTarget({ lat: 24.4, lon: 81.71, zoom: 4 });
     setSelectedNetwork("all");
     setSelectedOperator("all");
   };
@@ -187,20 +187,18 @@ export default function Dashboard() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "12px",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <span className="dash-badge">Viewport Insights</span>
-                <HelpPopover header={header} body={body} footer={footer} />
-              </div>
+              <span className="dash-badge">Viewport Insights</span>
+              <HelpPopover header={header} body={body} footer={footer} />
             </div>
+            <hr
+              style={{
+                margin: "16px 0",
+                border: "none",
+                borderTop: "2px solid #E2E8F0 ",
+              }}
+            />
 
             {/* header data */}
             <div style={{}}>

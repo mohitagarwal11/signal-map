@@ -224,6 +224,7 @@ export default function Map({
       }
 
       const bounds = getViewport(currentMap);
+      // console.log(bounds);
       const zoom = currentMap.getZoom();
       const network = selectedNetworkRef.current;
       const operator = selectedOperatorRef.current;
