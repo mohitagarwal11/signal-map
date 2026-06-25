@@ -79,8 +79,8 @@ export function createViewportController(config) {
     'network',
     fetchNetworkDistribution,
   );
-  
-  // Same debounce mechanism now drives viewport data fetches, so there's a single debounce implementation
+  // Same debounce mechanism drives viewport data fetches, so there's a single
+  // debounce implementation in the codebase instead of two.
   const debouncedExecuteRequest = debounceAsync(executeRequest, debounceMs);
 
   function cancelActiveRequest() {
@@ -230,8 +230,14 @@ export function createViewportController(config) {
     });
   }
 
-  function hydrateViewport({ bounds, zoom, mode, data, network = 'all' }) {
-    const { cacheKey } = getFetchDescriptor({ bounds, zoom, mode, network });
+  function hydrateViewport({ bounds, zoom, mode, data, network = 'all', operator = 'all' }) {
+    const { cacheKey } = getFetchDescriptor({
+      bounds,
+      zoom,
+      mode,
+      network,
+      operator,
+    });
     viewportCache.set(cacheKey, data);
     if (DEBUG) console.log('CACHE HYDRATED', cacheKey);
   }

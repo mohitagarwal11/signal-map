@@ -1,6 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { INITIAL_MAP_CONFIG } from '../map/config/mapConfig';
-import { INITIAL_VIEWPORT_BOUNDS } from '../constants/initialViewport';
+import {
+  INITIAL_VIEWPORT_BOUNDS,
+  INITIAL_VIEWPORT_ZOOM,
+  FETCH_DEBOUNCE_MS,
+} from '../constants/initialViewport';
 import {
   HEATMAP_SOURCE_ID,
   HEATMAP_LAYER_ID,
@@ -21,10 +25,10 @@ import {
   getNetworkDistribution,
 } from '../api/towers.api';
 import { createViewportController } from '../services/viewport/viewportController';
-import { FETCH_DEBOUNCE_MS } from '../constants/initialViewport';
 import { getAreaKm2 } from '../utils/getAreaKm2.js';
+import { INITIAL_HEATMAP_POINTS } from '../data/initialHeatmap.js';
 
-// Switch to true to log fetch timings performance
+// Flip to true to log fetch timings/counts when profiling backend perf.
 const DEBUG_PERF = false;
 
 export default function Map({
@@ -187,6 +191,19 @@ export default function Map({
       },
     });
 
+    // Pre-fill the fetch cache for the initial viewport with the same seed
+    // data, so if the first real fetch lands on this exact viewport (i.e.
+    // the user hasn't panned yet) it resolves from cache instead of
+    // waiting on a possibly cold-starting backend.
+    viewportController.hydrateViewport({
+      bounds: INITIAL_VIEWPORT_BOUNDS,
+      zoom: INITIAL_VIEWPORT_ZOOM,
+      mode: 'heatmap',
+      data: INITIAL_HEATMAP_POINTS,
+      network: 'all',
+      operator: 'all',
+    });
+
     const requestViewportData = async () => {
       const currentMap = mapRef.current;
 
@@ -278,6 +295,13 @@ export default function Map({
     const handleMapLoad = () => {
       renderState.mapReady = true;
 
+      renderMap({
+        map,
+        renderState,
+      });
+
+      renderState.heatmapGeoJSON = heatmapPointsToGeoJSON(INITIAL_HEATMAP_POINTS);
+      renderState.heatmapAvailable = true;
       renderMap({
         map,
         renderState,

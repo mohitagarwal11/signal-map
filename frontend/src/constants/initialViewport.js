@@ -1,6 +1,6 @@
 export const INITIAL_VIEWPORT_BOUNDS = {
-  min_lat: 8.66,
-  max_lat: 37.78,
+  min_lat: 10.09,
+  max_lat: 37.25,
   min_lon: 58.09,
   max_lon: 105.33,
 };
