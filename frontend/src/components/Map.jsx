@@ -1,31 +1,31 @@
-import { useEffect, useRef } from "react";
-import { INITIAL_MAP_CONFIG } from "../map/config/mapConfig";
-import { INITIAL_VIEWPORT_BOUNDS } from "../constants/initialViewport";
+import { useEffect, useRef } from 'react';
+import { INITIAL_MAP_CONFIG } from '../map/config/mapConfig';
+import { INITIAL_VIEWPORT_BOUNDS } from '../constants/initialViewport';
 import {
   HEATMAP_SOURCE_ID,
   HEATMAP_LAYER_ID,
   RAW_TOWER_SOURCE_ID,
   RAW_TOWER_LAYER_ID,
-} from "../map/constants/layerIds";
-import {
-  EMPTY_GEOJSON,
-  MAX_RAW_TOWERS,
-} from "../map/constants/renderConstants";
-import { removeGeoJSONLayerResources } from "../map/sources/removeGeoJSONResources";
-import { createRenderState } from "../map/state/createRenderState";
-import { renderMap } from "../map/rendering/renderMap";
-import { getViewport } from "../utils/getViewport";
-import { heatmapPointsToGeoJSON } from "../utils/heatmapPointsToGeoJSON";
-import { towersToGeoJSON } from "../utils/towersToGeoJSON";
+} from '../map/constants/layerIds';
+import { EMPTY_GEOJSON, MAX_RAW_TOWERS } from '../map/constants/renderConstants';
+import { removeGeoJSONLayerResources } from '../map/sources/removeGeoJSONResources';
+import { createRenderState } from '../map/state/createRenderState';
+import { renderMap } from '../map/rendering/renderMap';
+import { getViewport } from '../utils/getViewport';
+import { heatmapPointsToGeoJSON } from '../utils/heatmapPointsToGeoJSON';
+import { towersToGeoJSON } from '../utils/towersToGeoJSON';
 import {
   getTowersData,
   getHeatmapPoints,
   getOperatorDistribution,
   getNetworkDistribution,
-} from "../api/towers.api";
-import { createViewportController } from "../services/viewport/viewportController";
-import { FETCH_DEBOUNCE_MS } from "../constants/initialViewport";
-import { getAreaKm2 } from "../utils/getAreaKm2.js";
+} from '../api/towers.api';
+import { createViewportController } from '../services/viewport/viewportController';
+import { FETCH_DEBOUNCE_MS } from '../constants/initialViewport';
+import { getAreaKm2 } from '../utils/getAreaKm2.js';
+
+// Switch to true to log fetch timings performance
+const DEBUG_PERF = false;
 
 export default function Map({
   setMapCenter,
@@ -57,123 +57,94 @@ export default function Map({
 
     const renderState = createRenderState();
 
-    const fetchHeatmapPoints = async ({
-      bounds,
-      zoom,
-      signal,
-      network,
-      operator,
-    }) => {
-      // const fetchStart = performance.now();
+    const fetchHeatmapPoints = async ({ bounds, zoom, signal, network, operator }) => {
+      const fetchStart = DEBUG_PERF ? performance.now() : 0;
       const response = await getHeatmapPoints(bounds, zoom, {
         signal,
         network,
         operator,
       });
-      // const fetchDuration = performance.now() - fetchStart;
 
-      // console.log("PERF heatmap_fetch", {
-      //   durationMs: Number(fetchDuration.toFixed(2)),
-      //   pointCount: response.data.length,
-      //   zoom,
-      //   network,
-      //   operator,
-      // });
+      if (DEBUG_PERF) {
+        console.log('PERF heatmap_fetch', {
+          durationMs: Number((performance.now() - fetchStart).toFixed(2)),
+          pointCount: response.data.length,
+          zoom,
+          network,
+          operator,
+        });
+      }
 
       return response.data;
     };
 
-    const fetchTowers = async ({
-      bounds,
-      // zoom,
-      towerLimit,
-      signal,
-      network,
-      operator,
-    }) => {
-      // const fetchStart = performance.now();
-      const requestedLimit = Number.isFinite(towerLimit)
-        ? towerLimit
-        : MAX_RAW_TOWERS;
+    const fetchTowers = async ({ bounds, zoom, towerLimit, signal, network, operator }) => {
+      const fetchStart = DEBUG_PERF ? performance.now() : 0;
+      const requestedLimit = Number.isFinite(towerLimit) ? towerLimit : MAX_RAW_TOWERS;
       const response = await getTowersData(bounds, requestedLimit, 0, {
         signal,
         network,
         operator,
       });
-      // const fetchDuration = performance.now() - fetchStart;
-      const towers = Array.isArray(response.data.data)
-        ? response.data.data
-        : [];
+      const towers = Array.isArray(response.data.data) ? response.data.data : [];
       const cappedTowers = towers.slice(0, requestedLimit);
 
-      // console.log("PERF raw_fetch", {
-      //   durationMs: Number(fetchDuration.toFixed(2)),
-      //   returnedCount: towers.length,
-      //   renderedCount: cappedTowers.length,
-      //   zoom,
-      //   requestedLimit,
-      //   network,
-      //   operator,
-      // });
+      if (DEBUG_PERF) {
+        console.log('PERF raw_fetch', {
+          durationMs: Number((performance.now() - fetchStart).toFixed(2)),
+          returnedCount: towers.length,
+          renderedCount: cappedTowers.length,
+          zoom,
+          requestedLimit,
+          network,
+          operator,
+        });
+      }
 
       return cappedTowers;
     };
 
-    const fetchViewportOperatorDistribution = async (
-      bounds,
-      network,
-      operator,
-    ) => {
-      // const fetchStart = performance.now();
+    const fetchViewportOperatorDistribution = async (bounds, network, operator) => {
+      const fetchStart = DEBUG_PERF ? performance.now() : 0;
       const response = await getOperatorDistribution(bounds, {
         network,
         operator,
       });
-      // const fetchDuration = performance.now() - fetchStart;
-      const operators = Array.isArray(response.data?.operators)
-        ? response.data.operators
-        : [];
+      const operators = Array.isArray(response.data?.operators) ? response.data.operators : [];
 
-      // console.log("PERF operator_distribution_fetch", {
-      //   durationMs: Number(fetchDuration.toFixed(2)),
-      //   operatorCount: operators.length,
-      //   network,
-      //   operator,
-      // });
-
-      setOperatorDistribution(operators);
+      if (DEBUG_PERF) {
+        console.log('PERF operator_distribution_fetch', {
+          durationMs: Number((performance.now() - fetchStart).toFixed(2)),
+          operatorCount: operators.length,
+          network,
+          operator,
+        });
+      }
 
       return operators;
     };
 
-    const fetchViewportNetworkDistribution = async (
-      bounds,
-      network,
-      operator,
-    ) => {
-      // const fetchStart = performance.now();
+    const fetchViewportNetworkDistribution = async (bounds, network, operator) => {
+      const fetchStart = DEBUG_PERF ? performance.now() : 0;
       const response = await getNetworkDistribution(bounds, {
         network,
         operator,
       });
-      // const fetchDuration = performance.now() - fetchStart;
-      const networks = Array.isArray(response.data?.networks)
-        ? response.data.networks
-        : [];
+      const networks = Array.isArray(response.data?.networks) ? response.data.networks : [];
 
-      // console.log("PERF network_distribution_fetch", {
-      //   durationMs: Number(fetchDuration.toFixed(2)),
-      //   networkCount: networks.length,
-      //   network,
-      //   operator,
-      // });
-
-      setNetworkDistribution(networks);
+      if (DEBUG_PERF) {
+        console.log('PERF network_distribution_fetch', {
+          durationMs: Number((performance.now() - fetchStart).toFixed(2)),
+          networkCount: networks.length,
+          network,
+          operator,
+        });
+      }
 
       return networks;
     };
 
-    const map = new mapplsClient.Map("map", INITIAL_MAP_CONFIG);
+    const map = new mapplsClient.Map('map', INITIAL_MAP_CONFIG);
     mapRef.current = map;
 
     const { min_lat, max_lat, min_lon, max_lon } = INITIAL_VIEWPORT_BOUNDS;
@@ -191,7 +162,7 @@ export default function Map({
       onData: ({ mode, data }) => {
         renderState.fetchMode = mode;
 
-        if (mode === "heatmap") {
+        if (mode === 'heatmap') {
           renderState.heatmapGeoJSON = heatmapPointsToGeoJSON(data);
           renderState.heatmapAvailable = true;
           renderState.towersAvailable = false;
@@ -202,7 +173,7 @@ export default function Map({
           return;
         }
 
-        if (mode === "towers") {
+        if (mode === 'towers') {
           renderState.heatmapAvailable = false;
           renderState.heatmapGeoJSON = EMPTY_GEOJSON;
           renderState.towersAvailable = Array.isArray(data) && data.length > 0;
@@ -224,7 +195,6 @@ export default function Map({
       }
 
       const bounds = getViewport(currentMap);
-      // console.log(bounds);
       const zoom = currentMap.getZoom();
       const network = selectedNetworkRef.current;
       const operator = selectedOperatorRef.current;
@@ -233,18 +203,16 @@ export default function Map({
 
       if (isMaxZoomTowerView) {
         try {
-          const operators =
-            await viewportController.debouncedFetchOperatorDistribution(
-              bounds,
-              network,
-              operator,
-            );
+          const operators = await viewportController.debouncedFetchOperatorDistribution(
+            bounds,
+            network,
+            operator,
+          );
+
+          setOperatorDistribution(operators);
 
           const totalFromOperators = Array.isArray(operators)
-            ? operators.reduce(
-                (sum, op) => sum + Number(op.tower_count ?? 0),
-                0,
-              )
+            ? operators.reduce((sum, op) => sum + Number(op.tower_count ?? 0), 0)
             : 0;
 
           if (totalFromOperators > 0) {
@@ -253,20 +221,20 @@ export default function Map({
             towerLimit = MAX_RAW_TOWERS;
           }
         } catch (error) {
-          if (error?.name !== "CanceledError") {
-            console.log(
-              "Error fetching operator distribution for towerLimit:",
-              error,
-            );
+          if (error?.name !== 'CanceledError') {
+            console.log('Error fetching operator distribution for towerLimit:', error);
           }
         }
       }
 
       viewportController
         .debouncedFetchNetworkDistribution(bounds, network, operator)
+        .then((networks) => {
+          setNetworkDistribution(networks);
+        })
         .catch((error) => {
-          if (error?.name !== "CanceledError") {
-            console.log("Error fetching network distribution:", error);
+          if (error?.name !== 'CanceledError') {
+            console.log('Error fetching network distribution:', error);
           }
         });
 
@@ -281,9 +249,12 @@ export default function Map({
       if (!isMaxZoomTowerView) {
         viewportController
           .debouncedFetchOperatorDistribution(bounds, network, operator)
+          .then((operators) => {
+            setOperatorDistribution(operators);
+          })
           .catch((error) => {
-            if (error?.name !== "CanceledError") {
-              console.log("Error fetching operator distribution:", error);
+            if (error?.name !== 'CanceledError') {
+              console.log('Error fetching operator distribution:', error);
             }
           });
       }
@@ -291,12 +262,7 @@ export default function Map({
 
     const syncDashboard = () => {
       const bounds = getViewport(map);
-      const area = getAreaKm2(
-        bounds.min_lat,
-        bounds.max_lat,
-        bounds.min_lon,
-        bounds.max_lon,
-      );
+      const area = getAreaKm2(bounds.min_lat, bounds.max_lat, bounds.min_lon, bounds.max_lon);
 
       setAreaKm2(Math.round(area * 100) / 100);
 
@@ -310,7 +276,6 @@ export default function Map({
     requestViewportDataRef.current = requestViewportData;
 
     const handleMapLoad = () => {
-      // console.log("ZOOM: ", map.getZoom());
       renderState.mapReady = true;
 
       renderMap({
@@ -331,32 +296,26 @@ export default function Map({
     };
 
     const handleMoveEnd = () => {
-      // console.log("ZOOM: ", map.getZoom());
       requestViewportData();
 
       syncDashboard();
     };
 
-    map.on("load", handleMapLoad);
-    map.on("idle", handleIdle);
-    map.on("moveend", handleMoveEnd);
+    map.on('load', handleMapLoad);
+    map.on('idle', handleIdle);
+    map.on('moveend', handleMoveEnd);
 
     return () => {
       viewportController.destroy();
       requestViewportDataRef.current = null;
       mapRef.current = null;
-      map.off("load", handleMapLoad);
-      map.off("idle", handleIdle);
-      map.off("moveend", handleMoveEnd);
+      map.off('load', handleMapLoad);
+      map.off('idle', handleIdle);
+      map.off('moveend', handleMoveEnd);
       removeGeoJSONLayerResources(map, HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID);
       removeGeoJSONLayerResources(map, RAW_TOWER_SOURCE_ID, RAW_TOWER_LAYER_ID);
     };
-  }, [
-    setAreaKm2,
-    setMapCenter,
-    setNetworkDistribution,
-    setOperatorDistribution,
-  ]);
+  }, [setAreaKm2, setMapCenter, setNetworkDistribution, setOperatorDistribution]);
 
   useEffect(() => {
     if (!flyTarget || !mapRef.current) return;
@@ -371,9 +330,9 @@ export default function Map({
     <div
       id="map"
       style={{
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
       }}
     />
   );
