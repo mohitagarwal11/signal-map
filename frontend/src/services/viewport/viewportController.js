@@ -1,11 +1,11 @@
-import { getFetchMode } from "./getFetchMode";
-import { createViewportKey } from "./viewportKey";
-import { createViewportCache } from "./viewportCache";
-import { expandViewport } from "../../utils/expandViewport";
-import { quantizeViewport } from "../../utils/quantizeViewport";
+import { getFetchMode } from './getFetchMode';
+import { createViewportKey } from './viewportKey';
+import { createViewportCache } from './viewportCache';
+import { expandViewport } from '../../utils/expandViewport';
+import { quantizeViewport } from '../../utils/quantizeViewport';
 
-import { FETCH_DEBOUNCE_MS } from "../../constants/initialViewport";
-import { debounceAsync } from "../../utils/debounceAsync";
+import { FETCH_DEBOUNCE_MS } from '../../constants/initialViewport';
+import { debounceAsync } from '../../utils/debounceAsync';
 
 const VIEWPORT_EXPANSION_FACTOR = {
   heatmap: 0.3,
@@ -15,13 +15,17 @@ const VIEWPORT_EXPANSION_FACTOR = {
 const VIEWPORT_QUANTIZATION_STEP = {
   heatmap: 0.1,
   towers: 0.02,
+  operator: 0.1,
+  network: 0.1,
 };
+
+const DEBUG = false;
 
 function isAbortError(error) {
   return (
-    error?.name === "AbortError" ||
-    error?.name === "CanceledError" ||
-    error?.code === "ERR_CANCELED"
+    error?.name === 'AbortError' ||
+    error?.name === 'CanceledError' ||
+    error?.code === 'ERR_CANCELED'
   );
 }
 
@@ -35,7 +39,6 @@ export function createViewportController(config) {
     debounceMs = FETCH_DEBOUNCE_MS,
   } = config;
 
-  let debounceTimer = null;
   let activeRequest = null;
   const viewportCache = createViewportCache();
   const inFlightRequests = new Map();
@@ -45,21 +48,40 @@ export function createViewportController(config) {
     towers: fetchTowers,
   };
 
-  const debouncedFetchOperatorDistribution = debounceAsync(
-    fetchOperatorDistribution,
-    debounceMs,
-  );
-  const debouncedFetchNetworkDistribution = debounceAsync(
-    fetchNetworkDistribution,
-    debounceMs,
-  );
-
-  function clearDebounce() {
-    if (debounceTimer) {
-      window.clearTimeout(debounceTimer);
-      debounceTimer = null;
-    }
+  function createDistributionCacheKey(mode, bounds, network, operator) {
+    const quantized = quantizeViewport(bounds, VIEWPORT_QUANTIZATION_STEP[mode]);
+    const viewportKey = createViewportKey(quantized);
+    return `${mode}:${network}:${operator}:${viewportKey}`;
   }
+
+  function createCachedDistributionFetcher(mode, fetchFn) {
+    const debouncedFetch = debounceAsync(fetchFn, debounceMs);
+
+    return async (bounds, network = 'all', operator = 'all') => {
+      const cacheKey = createDistributionCacheKey(mode, bounds, network, operator);
+
+      if (viewportCache.has(cacheKey)) {
+        if (DEBUG) console.log('CACHE HIT', cacheKey);
+        return viewportCache.get(cacheKey);
+      }
+
+      const data = await debouncedFetch(bounds, network, operator);
+      viewportCache.set(cacheKey, data);
+      return data;
+    };
+  }
+
+  const debouncedFetchOperatorDistribution = createCachedDistributionFetcher(
+    'operator',
+    fetchOperatorDistribution,
+  );
+  const debouncedFetchNetworkDistribution = createCachedDistributionFetcher(
+    'network',
+    fetchNetworkDistribution,
+  );
+  
+  // Same debounce mechanism now drives viewport data fetches, so there's a single debounce implementation
+  const debouncedExecuteRequest = debounceAsync(executeRequest, debounceMs);
 
   function cancelActiveRequest() {
     if (activeRequest) {
@@ -68,14 +90,8 @@ export function createViewportController(config) {
     }
   }
 
-  function createCacheKey(
-    mode,
-    viewportKey,
-    towerLimit,
-    network = "all",
-    operator = "all",
-  ) {
-    if (mode === "towers" && typeof towerLimit === "number") {
+  function createCacheKey(mode, viewportKey, towerLimit, network = 'all', operator = 'all') {
+    if (mode === 'towers' && typeof towerLimit === 'number') {
       return `${mode}:${network}:${operator}:${viewportKey}:${towerLimit}`;
     }
 
@@ -87,18 +103,12 @@ export function createViewportController(config) {
     zoom,
     mode = getFetchMode(zoom),
     towerLimit,
-    network = "all",
-    operator = "all",
+    network = 'all',
+    operator = 'all',
   }) {
     const fetchBounds = createFetchBounds(bounds, mode, zoom);
     const viewportKey = createViewportKey(fetchBounds);
-    const cacheKey = createCacheKey(
-      mode,
-      viewportKey,
-      towerLimit,
-      network,
-      operator,
-    );
+    const cacheKey = createCacheKey(mode, viewportKey, towerLimit, network, operator);
 
     return {
       bounds: fetchBounds,
@@ -111,30 +121,16 @@ export function createViewportController(config) {
   }
 
   function createFetchBounds(bounds, mode, zoom) {
-    if (mode === "towers" && typeof zoom === "number" && zoom >= 15) {
+    if (mode === 'towers' && typeof zoom === 'number' && zoom >= 15) {
       return bounds;
     }
 
-    const bufferedBounds = expandViewport(
-      bounds,
-      VIEWPORT_EXPANSION_FACTOR[mode],
-    );
-    const quantizedBounds = quantizeViewport(
-      bufferedBounds,
-      VIEWPORT_QUANTIZATION_STEP[mode],
-    );
+    const bufferedBounds = expandViewport(bounds, VIEWPORT_EXPANSION_FACTOR[mode]);
+    const quantizedBounds = quantizeViewport(bufferedBounds, VIEWPORT_QUANTIZATION_STEP[mode]);
     return quantizedBounds;
   }
 
-  async function executeRequest({
-    bounds,
-    zoom,
-    mode,
-    cacheKey,
-    towerLimit,
-    network,
-    operator,
-  }) {
+  async function executeRequest({ bounds, zoom, mode, cacheKey, towerLimit, network, operator }) {
     const fetchViewportData = fetchByMode[mode];
 
     if (!fetchViewportData) {
@@ -142,7 +138,7 @@ export function createViewportController(config) {
     }
 
     if (viewportCache.has(cacheKey)) {
-      // console.log("CACHE HIT", cacheKey);
+      if (DEBUG) console.log('CACHE HIT', cacheKey);
       cancelActiveRequest();
       onData({
         mode,
@@ -151,10 +147,10 @@ export function createViewportController(config) {
       return;
     }
 
-    // console.log("CACHE MISS", cacheKey);
+    if (DEBUG) console.log('CACHE MISS', cacheKey);
 
     if (inFlightRequests.has(cacheKey)) {
-      console.log("REQUEST REUSED", cacheKey);
+      if (DEBUG) console.log('REQUEST REUSED', cacheKey);
 
       try {
         const data = await inFlightRequests.get(cacheKey);
@@ -218,38 +214,29 @@ export function createViewportController(config) {
     }
   }
 
-  function handleViewportChange({
-    bounds,
-    zoom,
-    towerLimit,
-    network = "all",
-    operator = "all",
-  }) {
-    clearDebounce();
+  function handleViewportChange({ bounds, zoom, towerLimit, network = 'all', operator = 'all' }) {
+    const descriptor = getFetchDescriptor({
+      bounds,
+      zoom,
+      towerLimit,
+      network,
+      operator,
+    });
 
-    debounceTimer = window.setTimeout(() => {
-      const descriptor = getFetchDescriptor({
-        bounds,
-        zoom,
-        towerLimit,
-        network,
-        operator,
-      });
-
-      executeRequest({ ...descriptor, zoom }).catch((error) => {
-        console.log("Error fetching viewport data:", error);
-      });
-    }, debounceMs);
+    debouncedExecuteRequest({ ...descriptor, zoom }).catch((error) => {
+      if (!isAbortError(error)) {
+        console.log('Error fetching viewport data:', error);
+      }
+    });
   }
 
-  function hydrateViewport({ bounds, zoom, mode, data, network = "all" }) {
+  function hydrateViewport({ bounds, zoom, mode, data, network = 'all' }) {
     const { cacheKey } = getFetchDescriptor({ bounds, zoom, mode, network });
     viewportCache.set(cacheKey, data);
-    console.log("CACHE HYDRATED", cacheKey);
+    if (DEBUG) console.log('CACHE HYDRATED', cacheKey);
   }
 
   function destroy() {
-    clearDebounce();
     cancelActiveRequest();
     inFlightRequests.clear();
     viewportCache.clear();

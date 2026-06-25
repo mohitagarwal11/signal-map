@@ -3,10 +3,12 @@ const MAX_CACHE_ENTRIES = 24;
 const CACHE_TTL_MS = {
   heatmap: 15_000,
   towers: 10_000,
+  operator: 15_000,
+  network: 15_000,
 };
 
 function getModeFromKey(key) {
-  return String(key).split(":")[0];
+  return String(key).split(':')[0];
 }
 
 function getExpiresAt(key) {

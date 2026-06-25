@@ -1,3 +1,7 @@
+function makeCanceledError() {
+  return Object.assign(new Error('Canceled'), { name: 'CanceledError' });
+}
+
 export function debounceAsync(fn, wait) {
   let timer = null;
   let pendingReject = null;
@@ -6,7 +10,7 @@ export function debounceAsync(fn, wait) {
     if (timer) {
       window.clearTimeout(timer);
       if (pendingReject) {
-        pendingReject({ name: "CanceledError" });
+        pendingReject(makeCanceledError());
         pendingReject = null;
       }
     }
