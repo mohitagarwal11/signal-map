@@ -26,7 +26,7 @@ import {
 } from '../api/towers.api';
 import { createViewportController } from '../services/viewport/viewportController';
 import { getAreaKm2 } from '../utils/getAreaKm2.js';
-import { INITIAL_HEATMAP_POINTS } from '../data/initialHeatmap.js';
+import { INITIAL_HEATMAP_POINTS } from '../data/InitialHeatmap.js';
 
 // Flip to true to log fetch timings/counts when profiling backend perf.
 const DEBUG_PERF = false;
