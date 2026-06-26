@@ -191,10 +191,6 @@ export default function Map({
       },
     });
 
-    // Pre-fill the fetch cache for the initial viewport with the same seed
-    // data, so if the first real fetch lands on this exact viewport (i.e.
-    // the user hasn't panned yet) it resolves from cache instead of
-    // waiting on a possibly cold-starting backend.
     viewportController.hydrateViewport({
       bounds: INITIAL_VIEWPORT_BOUNDS,
       zoom: INITIAL_VIEWPORT_ZOOM,
@@ -301,6 +297,7 @@ export default function Map({
       });
 
       renderState.heatmapGeoJSON = heatmapPointsToGeoJSON(INITIAL_HEATMAP_POINTS);
+
       renderState.heatmapAvailable = true;
       renderMap({
         map,
@@ -310,23 +307,12 @@ export default function Map({
       syncDashboard();
     };
 
-    let initialFetchDone = false;
-
-    const handleIdle = () => {
-      if (!initialFetchDone) {
-        initialFetchDone = true;
-        requestViewportData();
-      }
-    };
-
     const handleMoveEnd = () => {
       requestViewportData();
-
       syncDashboard();
     };
 
     map.on('load', handleMapLoad);
-    map.on('idle', handleIdle);
     map.on('moveend', handleMoveEnd);
 
     return () => {
@@ -334,7 +320,6 @@ export default function Map({
       requestViewportDataRef.current = null;
       mapRef.current = null;
       map.off('load', handleMapLoad);
-      map.off('idle', handleIdle);
       map.off('moveend', handleMoveEnd);
       removeGeoJSONLayerResources(map, HEATMAP_SOURCE_ID, HEATMAP_LAYER_ID);
       removeGeoJSONLayerResources(map, RAW_TOWER_SOURCE_ID, RAW_TOWER_LAYER_ID);

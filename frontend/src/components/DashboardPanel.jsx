@@ -1,6 +1,5 @@
 import Card from './Card.jsx';
 import HelpPopover from './HelpPopover.jsx';
-import { LinkIcon } from '../assets/Icons';
 
 import PanelCard from './PanelCard';
 import DistributionTable from './DistributionTable';
@@ -24,57 +23,52 @@ export default function DashboardPanel({
 }) {
   return (
     <aside
-      className="relative min-h-0 h-full max-h-full w-full overflow-hidden border-l border-[#dce3ec] bg-slate-50 max-[900px]:fixed max-[900px]:bottom-0 max-[900px]:left-0 max-[900px]:right-0 max-[900px]:z-[900] max-[900px]:h-[100dvh] max-[900px]:rounded-t-2xl max-[900px]:border-l-0 max-[900px]:shadow-2xl"
-      style={{
-        transform:
-          typeof window !== 'undefined' && window.innerWidth <= 900
-            ? sheetOpen
-              ? 'translateY(220px)'
-              : 'translateY(calc(100% - 145px))'
-            : undefined,
-        transition: 'transform .38s cubic-bezier(0.32,0.72,0,1)',
-      }}
+      className={`relative border-l border-[#dce3ec] bg-slate-50 transition-transform duration-380 ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:fixed max-lg:flex max-lg:flex-col max-lg:bottom-0 max-lg:left-0 max-lg:right-0 max-lg:z-900 max-lg:h-dvh max-lg:rounded-t-2xl max-lg:border-l-0 max-lg:shadow-2xl ${
+        sheetOpen ? 'max-lg:translate-y-55' : 'max-lg:translate-y-[calc(100%-145px)]'
+      }`}
     >
       <div
-        className="hidden cursor-pointer items-center justify-center py-[10px] pb-[14px] max-[900px]:flex"
+        className="hidden cursor-pointer items-center justify-center py-2.5 pb-3.5 max-lg:flex"
         onClick={() => setSheetOpen((v) => !v)}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="h-[5px] w-12 rounded-sm bg-slate-300" />
+        <div className="h-1.25 w-12 rounded-sm bg-slate-300" />
       </div>
 
-      <div className="absolute inset-0 flex min-h-0 flex-col gap-2 overflow-y-auto overflow-x-hidden p-4 max-[900px]:static max-[900px]:pb-[250px]">
+      <div className="absolute inset-0 flex min-h-0 flex-col gap-2 overflow-y-auto overflow-x-hidden p-4 max-lg:static max-lg:pb-62.5 max-lg:flex-1">
         <div className="flex justify-center">
           <span className="text-[18px] font-bold tracking-[1px] lg:text-[22px]">{header}</span>
 
           <HelpPopover header={header} body={body} footer={footer} />
         </div>
 
-        <hr className="my-4 border-t-2 border-[#e2e8f0]" />
+        <hr className="border-t-2 border-[#e2e8f0]" />
 
+        {/* center of map lat and lon */}
         <p className="flex justify-center text-sm text-[#64748b]">
           Lat: {mapCenter.lat} | Lon: {mapCenter.lon}
         </p>
 
+        {/* best recommended service */}
         <PanelCard>
-          <div className="flex items-center gap-2 text-[var(--blue)]">
-            <LinkIcon />
+          <div className="text-xs font-bold text-(--text-muted)">RECOMMENDED SERVICE</div>
+
+          <div className="mt-2 text-xl font-bold">{recommendedOperatorName}</div>
+
+          <div className="text-sm text-(--green)">{recommendedAvailability} Availability</div>
+        </PanelCard>
+
+        {/* infra score */}
+        <PanelCard>
+          <div className="flex items-center gap-2 text-(--blue)">
             <span className="text-xs font-bold">INFRASTRUCTURE SCORE</span>
           </div>
 
           <div className="mt-2 text-4xl font-bold">
             {infrastructureScore?.toFixed(2) ?? '-'}
-            <span className="ml-1 text-lg text-[var(--text-secondary)]">/100</span>
+            <span className="ml-1 text-lg text-(--text-secondary)">/100</span>
           </div>
-        </PanelCard>
-
-        <PanelCard>
-          <div className="text-xs font-bold text-[var(--text-muted)]">RECOMMENDED SERVICE</div>
-
-          <div className="mt-2 text-xl font-bold">{recommendedOperatorName}</div>
-
-          <div className="text-sm text-[var(--green)]">{recommendedAvailability} Availability</div>
         </PanelCard>
 
         <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2">
@@ -99,7 +93,7 @@ export default function DashboardPanel({
           columns={['OPERATOR', 'TOWER COUNT', '% SHARE']}
           rows={operatorDistributionRowsWithShare.map((b) => (
             <tr key={b.operator_name}>
-              <td className="border-b border-slate-100 px-3 py-3 font-bold text-[var(--blue)]">
+              <td className="border-b border-slate-100 px-3 py-3 font-bold text---blue)">
                 {b.operator_name}
               </td>
               <td className="border-b border-slate-100 px-3 py-3">
@@ -115,7 +109,7 @@ export default function DashboardPanel({
           columns={['NETWORK', 'TOWER COUNT']}
           rows={networkDistributionRows.map((n) => (
             <tr key={n.radio}>
-              <td className="border-b border-slate-100 px-3 py-3 font-bold text-[var(--blue)]">
+              <td className="border-b border-slate-100 px-3 py-3 font-bold text-(--blue)">
                 {n.radio}
               </td>
               <td className="border-b border-slate-100 px-3 py-3">

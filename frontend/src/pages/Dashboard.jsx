@@ -11,17 +11,24 @@ import DashboardPanel from '../components/DashboardPanel.jsx';
 import useBottomSheet from '../utils/useBottomSheet.js';
 
 import { OPERATOR_OPTIONS, NETWORK_OPTIONS } from '../constants/dashboard.js';
+import {
+  INITIAL_NETWORK_DISTRIBUTION,
+  INITIAL_OPERATOR_DISTRIBUTION,
+} from '../data/InitialPanelData.js';
+import { INITIAL_VIEWPORT_ZOOM, INITIAL_MAP_CENTER } from '../constants/initialViewport.js';
 
 import { deriveOperatorMetrics } from '../utils/operatorUtility';
 import { deriveNetworkMetrics } from '../utils/networkUtility';
 import { getInfrastructureScore } from '../utils/getInfrastructureScore.js';
 
 export default function Dashboard() {
-  const [operatorDistribution, setOperatorDistribution] = useState([]);
-  const [networkDistribution, setNetworkDistribution] = useState([]);
+  const [operatorDistribution, setOperatorDistribution] = useState(INITIAL_OPERATOR_DISTRIBUTION);
+
+  const [networkDistribution, setNetworkDistribution] = useState(INITIAL_NETWORK_DISTRIBUTION);
+
   const [mapCenter, setMapCenter] = useState({
-    lat: 24.4,
-    lon: 81.71,
+    lat: INITIAL_MAP_CENTER.lat,
+    lon: INITIAL_MAP_CENTER.lon,
   });
 
   const [selectedOperator, setSelectedOperator] = useState('all');
@@ -63,10 +70,13 @@ export default function Dashboard() {
 
   const resetMap = () => {
     setFlyTarget({
-      lat: 24.4,
-      lon: 81.71,
-      zoom: 4,
+      lat: INITIAL_MAP_CENTER.lat,
+      lon: INITIAL_MAP_CENTER.lon,
+      zoom: INITIAL_VIEWPORT_ZOOM,
     });
+
+    setNetworkDistribution(INITIAL_NETWORK_DISTRIBUTION);
+    setOperatorDistribution(INITIAL_OPERATOR_DISTRIBUTION);
 
     setSelectedNetwork('all');
     setSelectedOperator('all');
@@ -74,7 +84,7 @@ export default function Dashboard() {
 
   return (
     <div
-      className="flex h-screen w-full min-h-0 flex-col bg-[var(--bg)] text-[var(--text-primary)]"
+      className="flex h-screen w-full min-h-0 flex-col bg-(--bg) text-(--text-primary)"
       style={{
         fontFamily:
           '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
@@ -82,7 +92,7 @@ export default function Dashboard() {
     >
       <DashboardHeader onReset={resetMap} />
 
-      <div className="flex-1 overflow-hidden min-h-0 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_clamp(340px,30vw,760px)]">
+      <div className="flex-1 overflow-hidden min-h-0 grid grid-rows-[1fr] grid-cols-1 lg:grid-cols-[minmax(0,1fr)_clamp(340px,30vw,760px)]">
         {/* MAP AREA */}
         <div className="relative min-h-0 min-w-0">
           <MapBanner />
@@ -97,18 +107,7 @@ export default function Dashboard() {
             }}
           />
 
-          <div
-            className="
-              absolute z-[500]
-              flex items-center gap-3
-              top-4 right-4
-
-              max-[900px]:top-[74px]
-              max-[900px]:left-1/2
-              max-[900px]:right-auto
-              max-[900px]:-translate-x-1/2
-            "
-          >
+          <div className="absolute z-500 flex items-center gap-3 top-4 right-4 max-lg:top-18.5 max-lg:left-1/2 max-lg:right-auto max-lg:-translate-x-1/2">
             <FilterDropdown
               value={selectedOperator}
               options={OPERATOR_OPTIONS}
