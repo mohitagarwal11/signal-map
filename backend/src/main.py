@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from src.routes.towers_routes import router as towers_router
 from src.routes.search_routes import router as search_router
+from src.routes.llm_routes import router as llm_router
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
@@ -30,6 +31,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.include_router(towers_router, prefix="/towers", tags=["Towers"])
 app.include_router(search_router, prefix="/search", tags=["Search"])
+app.include_router(llm_router, prefix="/llm", tags=["LLM"])
 
 
 @app.get("/")

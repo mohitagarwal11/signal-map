@@ -329,6 +329,18 @@ export default function Map({
   useEffect(() => {
     if (!flyTarget || !mapRef.current) return;
 
+    if (flyTarget.bounds) {
+      const { min_lat, max_lat, min_lon, max_lon } = flyTarget.bounds;
+      mapRef.current.fitBounds(
+        [
+          [min_lon, min_lat],
+          [max_lon, max_lat],
+        ],
+        { padding: 56, duration: 1000 },
+      );
+      return;
+    }
+
     mapRef.current.flyTo({
       center: [flyTarget.lon, flyTarget.lat],
       zoom: flyTarget.zoom,
