@@ -7,6 +7,7 @@ import MapBanner from '../components/MapBanner.jsx';
 
 import DashboardHeader from '../components/DashboardHeader.jsx';
 import DashboardPanel from '../components/DashboardPanel.jsx';
+import ChatBot from '../components/ChatBot.jsx';
 
 import useBottomSheet from '../utils/useBottomSheet.js';
 
@@ -131,6 +132,11 @@ export default function Dashboard() {
             selectedOperator={selectedOperator}
             setAreaKm2={setAreaKm2}
             flyTarget={flyTarget}
+          />
+
+          <ChatBot
+            className="absolute bottom-6 left-6"
+            onMapTarget={(mapTarget) => setFlyTarget(mapTarget)}
           />
         </div>
 

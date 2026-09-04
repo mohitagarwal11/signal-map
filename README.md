@@ -57,6 +57,7 @@ These optimizations keep latency low even for large viewports.
 - Viewport-optimized fetching - limits API calls during map interaction.
 - Infrastructure scoring - a client-side viewport-level score (0-100) computed from radio tech mix, operator diversity, and coverage.
 - Search - backend geocode proxy and frontend search UI for location and tower lookup.
+- **AI Chatbot** - Natural language interface to query tower data (e.g., "How many 4G towers in Delhi?", "Show me Jio towers in Mumbai").
 
 ## API (selected endpoints)
 
@@ -66,6 +67,7 @@ These optimizations keep latency low even for large viewports.
 - `GET /towers/operator` - per-operator distribution in bounds.
 - `GET /towers/network` - per-network (radio) distribution in bounds.
 - `GET /search/fgeocode?q=<query>` - backend geocode proxy (requires `GEOCODE_API_KEY`).
+- `POST /llm/query` - AI chatbot for natural language queries about cell towers (requires `GEMINI_API_KEY` and `GEOCODE_API_KEY`).
 
 ## Implementation Notes
 
